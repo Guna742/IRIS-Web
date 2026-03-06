@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /* =========================================
    InternTrack — Students Page Styles
    ========================================= */
@@ -12,508 +11,95 @@
     margin-bottom: var(--sp-6);
     gap: var(--sp-4);
     flex-wrap: wrap;
+    /* Essential for mobile */
 }
 
-.students-header h1 {
-    font-size: var(--fs-xl);
-    font-weight: var(--fw-bold);
-}
-
-.students-count {
-    font-size: var(--fs-xs);
-    color: var(--clr-text-muted);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-full);
-    padding: .25rem .75rem;
-    font-weight: var(--fw-medium);
-}
-
-/* ── Students List ── */
-.students-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-4);
-}
-
-/* ── Student Card ── */
-.student-card {
-    background: var(--clr-bg-surface);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    transition:
-        border-color var(--dur-normal) var(--ease-out),
-        box-shadow var(--dur-normal) var(--ease-out);
-}
-
-.student-card:hover {
-    border-color: rgba(79, 124, 255, .25);
-    box-shadow: 0 4px 24px rgba(79, 124, 255, .08);
-}
-
-.student-card.expanded {
-    border-color: rgba(79, 124, 255, .35);
-    box-shadow: 0 8px 32px rgba(79, 124, 255, .12);
-}
-
-/* ── Card Summary Row (always visible) ── */
-.student-summary {
+.header-main-info {
     display: flex;
     align-items: center;
-    gap: var(--sp-4);
-    padding: var(--sp-4) var(--sp-5);
-    cursor: pointer;
-    user-select: none;
-    transition: background var(--dur-fast);
-}
-
-.student-summary:hover {
-    background: rgba(255, 255, 255, .025);
-}
-
-/* Profile picture */
-.student-avatar {
-    width: 52px;
-    height: 52px;
-    border-radius: var(--radius-full);
+    gap: 8px;
     flex-shrink: 0;
-    overflow: hidden;
-    background: linear-gradient(135deg, var(--clr-accent), var(--clr-indigo));
+}
+
+.header-search-area {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 1.35rem;
-    font-weight: var(--fw-bold);
-    color: #fff;
-    border: 2px solid rgba(79, 124, 255, .3);
-    position: relative;
-}
-
-.student-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: var(--radius-full);
-}
-
-.student-avatar-initials {
-    font-size: 1.35rem;
-    font-weight: var(--fw-bold);
-    color: #fff;
-}
-
-/* Name + role */
-.student-identity {
     flex: 1;
-    min-width: 0;
-}
-
-.student-name {
-    font-size: var(--fs-base);
-    font-weight: var(--fw-semi);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.student-role-tag {
-    font-size: var(--fs-xs);
-    color: var(--clr-text-muted);
-    margin-top: 2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Rating stars */
-.student-rating {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-    flex-shrink: 0;
-}
-
-.stars {
-    display: flex;
-    gap: 2px;
-}
-
-.star {
-    font-size: .9rem;
-    line-height: 1;
-}
-
-.star.filled {
-    color: var(--clr-warning);
-}
-
-.star.half {
-    color: var(--clr-warning);
-    opacity: .6;
-}
-
-.star.empty {
-    color: var(--clr-text-muted);
-}
-
-.rating-value {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semi);
-    color: var(--clr-warning);
-    min-width: 24px;
-}
-
-/* Overall score pill */
-.student-score {
-    flex-shrink: 0;
-    text-align: center;
-}
-
-.score-ring {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--radius-full);
-    background: conic-gradient(var(--clr-accent) var(--score-deg, 0deg), var(--glass-bg) 0deg);
-    display: flex;
-    align-items: center;
     justify-content: center;
-    position: relative;
-    box-shadow: 0 0 0 2px var(--glass-border);
+    min-width: 200px;
 }
 
-.score-ring::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: var(--radius-full);
-    background: var(--clr-bg-surface);
-}
-
-.score-num {
-    position: relative;
-    z-index: 1;
-    font-size: .65rem;
-    font-weight: var(--fw-bold);
-    color: var(--clr-text-primary);
-    line-height: 1;
-}
-
-/* Expand arrow button */
-.expand-btn {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-full);
-    border: 1px solid var(--glass-border);
-    background: var(--glass-bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition:
-        background var(--dur-fast),
-        border-color var(--dur-fast),
-        transform var(--dur-normal) var(--ease-spring);
-    color: var(--clr-text-muted);
-}
-
-.student-card.expanded .expand-btn {
-    transform: rotate(90deg);
-    background: rgba(79, 124, 255, .1);
-    border-color: rgba(79, 124, 255, .3);
-    color: var(--clr-accent);
-}
-
-/* ── Expanded Details Panel ── */
-.student-details {
-    display: grid;
-    grid-template-rows: 0fr;
-    transition: grid-template-rows var(--dur-normal) var(--ease-out);
-    border-top: 0px solid var(--glass-border);
-}
-
-.student-card.expanded .student-details {
-    grid-template-rows: 1fr;
-    border-top-width: 1px;
-}
-
-.student-details-inner {
-    overflow: hidden;
-}
-
-.student-details-body {
-    padding: var(--sp-5) var(--sp-5);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--sp-5);
-}
-
-/* Detail sections */
-.detail-section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-3);
-}
-
-.detail-section-title {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-semi);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    color: var(--clr-text-muted);
-    margin-bottom: var(--sp-1);
-}
-
-.detail-row {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--sp-2);
-}
-
-.detail-row-label {
-    font-size: var(--fs-xs);
-    color: var(--clr-text-muted);
-    min-width: 80px;
-    flex-shrink: 0;
-}
-
-.detail-row-value {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-medium);
-    color: var(--clr-text-primary);
-}
-
-/* Progress bar */
-.progress-wrap {
-    margin-top: var(--sp-3);
-}
-
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--fs-xs);
-    color: var(--clr-text-muted);
-    margin-bottom: var(--sp-2);
-}
-
-.progress-label span:last-child {
-    color: var(--clr-accent);
-    font-weight: var(--fw-semi);
-}
-
-.progress-track {
-    height: 6px;
-    background: var(--glass-bg);
-    border-radius: var(--radius-full);
-    overflow: hidden;
-    border: 1px solid var(--glass-border);
-}
-
-.progress-fill {
-    height: 100%;
-    border-radius: var(--radius-full);
-    background: linear-gradient(90deg, var(--clr-accent), var(--clr-indigo));
-    transform-origin: left;
-    transition: transform .8s var(--ease-out);
-    transform: scaleX(0);
-}
-
-.student-card.expanded .progress-fill {
-    transform: scaleX(1);
-}
-
-/* Skills chips */
-.skills-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--sp-2);
-    margin-top: var(--sp-2);
-}
-
-.skill-chip {
-    font-size: var(--fs-xs);
-    font-weight: var(--fw-medium);
-    padding: .2rem .6rem;
-    border-radius: var(--radius-full);
-    background: rgba(79, 124, 255, .1);
-    border: 1px solid rgba(79, 124, 255, .2);
-    color: var(--clr-accent);
-}
-
-/* Projects list in details */
-.student-projects-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-    margin-top: var(--sp-2);
-}
-
-.student-proj-item {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-2);
-    padding: var(--sp-2) var(--sp-3);
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--radius-md);
-    font-size: var(--fs-xs);
-}
-
-.student-proj-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: var(--radius-full);
-    background: var(--clr-accent);
-    flex-shrink: 0;
-}
-
-.student-proj-name {
-    font-weight: var(--fw-medium);
-    color: var(--clr-text-primary);
-    flex: 1;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-/* Clickable project item link */
-.student-proj-link {
-    text-decoration: none;
-    transition:
-        background var(--dur-fast),
-        border-color var(--dur-fast);
-}
-
-.student-proj-link:hover {
-    background: rgba(79, 124, 255, .1);
-    border-color: rgba(79, 124, 255, .25);
-}
-
-.student-proj-link:hover .student-proj-name {
-    color: var(--clr-accent);
-}
-
-.proj-arrow {
-    flex-shrink: 0;
-    color: var(--clr-text-muted);
-    opacity: 0;
-    transform: translateX(-4px);
-    transition: all var(--dur-fast) var(--ease-out);
-}
-
-.student-proj-link:hover .proj-arrow {
-    opacity: 1;
-    transform: translateX(0);
-    color: var(--clr-accent);
-}
-
-/* Edit profile row */
-.detail-edit-row {
-    grid-column: 1 / -1;
-    padding-top: var(--sp-4);
-    border-top: 1px solid var(--glass-border);
+.header-actions {
     display: flex;
     justify-content: flex-end;
-}
-
-.edit-profile-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--sp-2);
-    font-size: var(--fs-xs);
-}
-
-/* ── Empty state ── */
-.students-empty {
-    text-align: center;
-    padding: var(--sp-16) var(--sp-8);
-    color: var(--clr-text-muted);
-}
-
-.students-empty-icon {
-    font-size: 3rem;
-    margin-bottom: var(--sp-4);
-}
-
-.students-empty p {
-    font-size: var(--fs-sm);
-}
-
-/* ── Responsive ── */
-@media (max-width: 768px) {
-    .student-details-body {
-        grid-template-columns: 1fr;
-    }
-
-    .student-score {
-        display: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .students-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .student-summary {
-        padding: var(--sp-3) var(--sp-4);
-    }
-
-    .student-avatar {
-        width: 44px;
-        height: 44px;
-    }
-
-    .student-rating {
-        display: none;
-    }
-}
-
-@media (max-width: 580px) {
-    .students-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--sp-3);
-    }
-
-    .student-summary {
-        padding: var(--sp-4);
-        gap: var(--sp-3);
-    }
-
-    .student-avatar {
-        width: 44px;
-        height: 44px;
-    }
-
-    .student-rating {
-        display: none;
-    }
-
-    .student-name {
-        font-size: var(--fs-sm);
-    }
-=======
-/* =========================================
-   InternTrack — Students Page Styles
-   ========================================= */
-@import './global.css';
-
-/* ── Page Header ── */
-.students-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--sp-6);
-    gap: var(--sp-4);
-    flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .students-header h1 {
     font-size: var(--fs-xl);
     font-weight: var(--fw-bold);
+    white-space: nowrap;
+}
+
+/* ── Premium Search Bar ── */
+.search-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    transition: all var(--dur-normal) var(--ease-out-expo);
+    z-index: 10;
+}
+
+.search-wrap .form-input {
+    padding-left: 36px !important;
+    width: 100%;
+    font-size: 13px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    color: var(--clr-text-primary);
+    transition: all var(--dur-normal) var(--ease-out-expo);
+}
+
+.search-wrap .form-input:focus {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--clr-accent);
+    box-shadow: 0 0 0 4px rgba(79, 124, 255, 0.1), 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.search-wrap .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--clr-text-muted);
+    pointer-events: none;
+    transition: all var(--dur-normal) var(--ease-out-expo);
+    opacity: 0.7;
+}
+
+.search-wrap .form-input:focus+.search-icon {
+    color: var(--clr-accent);
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.search-wrap::after {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: calc(var(--radius-md) + 2px);
+    background: linear-gradient(135deg, var(--clr-accent), var(--clr-indigo));
+    opacity: 0;
+    z-index: -1;
+    transition: opacity var(--dur-normal) ease;
+    filter: blur(8px);
+}
+
+.search-wrap:focus-within::after {
+    opacity: 0.15;
 }
 
 .students-count {
@@ -646,16 +232,24 @@
     align-items: center;
     gap: var(--sp-1);
     flex-shrink: 0;
+    flex-wrap: nowrap;
+}
+
+.rating-value {
+    white-space: nowrap;
 }
 
 .stars {
     display: flex;
     gap: 2px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
 }
 
 .star {
     font-size: .9rem;
     line-height: 1;
+    flex-shrink: 0;
 }
 
 .star.filled {
@@ -756,6 +350,7 @@
 
 .student-details-inner {
     overflow: hidden;
+    min-width: 0;
 }
 
 .student-details-body {
@@ -763,18 +358,21 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--sp-12);
+    min-width: 0;
 }
 
 .detail-column {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-10);
+    gap: var(--sp-6);
+    min-width: 0;
 }
 
 .detail-group {
     display: flex;
     flex-direction: column;
     gap: var(--sp-3-5);
+    min-width: 0;
 }
 
 .detail-section-title {
@@ -792,6 +390,8 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
     padding: var(--sp-3) var(--sp-4);
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--glass-border);
@@ -801,6 +401,7 @@
 .rating-label {
     font-size: var(--fs-xs);
     color: var(--clr-text-secondary);
+    min-width: 100px;
 }
 
 .detail-row-value {
@@ -811,8 +412,8 @@
 
 /* Meta vertical list spacing */
 .meta-badges-vertical {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: var(--sp-3);
 }
 
@@ -828,22 +429,31 @@
     color: var(--clr-text-secondary);
     text-decoration: none;
     transition: all var(--dur-normal) var(--ease-out-expo);
+    flex-wrap: nowrap;
 }
 
 .hero-meta-item.clickable:hover {
     background: rgba(79, 124, 255, 0.06);
     border-color: var(--clr-accent);
     color: var(--clr-text-primary);
-    transform: translateX(6px);
+    transform: translateY(-2px);
 }
 
 .meta-icon {
-    font-size: 1rem;
+    font-size: 1.1rem;
+    width: 20px;
+    display: flex;
+    justify-content: center;
     opacity: 0.8;
+    flex-shrink: 0;
 }
 
 .meta-text {
     flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
 }
 
 /* Progress bar */
@@ -854,9 +464,12 @@
 .progress-label {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: var(--fs-xs);
     color: var(--clr-text-muted);
     margin-bottom: var(--sp-2-5);
+    flex-wrap: nowrap;
+    gap: 4px;
 }
 
 .progress-label span:last-child {
@@ -909,13 +522,15 @@
     letter-spacing: .04em;
 }
 
-/* Projects list in details */
 .project-progress-card {
     background: rgba(255, 255, 255, 0.02);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     padding: var(--sp-5);
     transition: transform 0.3s var(--dur-normal) var(--ease-out-expo);
+    max-width: 100%;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .project-progress-card:hover {
@@ -952,17 +567,29 @@
     color: var(--clr-accent);
 }
 
+.pp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: var(--sp-4);
+    margin-bottom: var(--sp-4);
+}
+
 .pp-title {
     font-size: var(--fs-sm);
     font-weight: var(--fw-bold);
     color: var(--clr-text-primary);
-    margin-bottom: var(--sp-2);
+    margin-bottom: 0;
+    /* Reset margin since it was replaced by gap on pp-header */
 }
 
 .pp-status-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
 }
 
 .pp-status-badge {
@@ -978,16 +605,71 @@
     color: var(--clr-text-muted);
 }
 
+.pp-updates-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    position: relative;
+    padding-left: var(--sp-4);
+    margin-top: var(--sp-4);
+}
+
+.pp-updates-list::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 5px;
+    bottom: 5px;
+    width: 2px;
+    background: rgba(255, 255, 255, .05);
+}
+
 .pp-update-item {
-    margin-top: var(--sp-3);
-    padding-top: var(--sp-3);
-    border-top: 1px solid var(--glass-border);
+    position: relative;
+    display: flex;
+    gap: var(--sp-4);
+}
+
+.pp-update-dot {
+    position: absolute;
+    left: -15px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--clr-accent);
+    box-shadow: 0 0 8px var(--clr-accent);
+}
+
+.pp-update-time {
+    font-size: 10px;
+    font-weight: var(--fw-bold);
+    color: var(--clr-accent);
+    text-transform: uppercase;
+    margin-bottom: 2px;
 }
 
 .pp-update-text {
-    font-size: var(--fs-xs);
-    color: var(--clr-text-muted);
+    font-size: var(--fs-sm);
+    color: var(--clr-text-secondary);
     line-height: 1.5;
+}
+
+/* ── Contextual Inline Forms ── */
+.inline-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    animation: fadeInDown 0.3s var(--ease-out) forwards;
+}
+
+.inline-form-row {
+    display: flex;
+    gap: var(--sp-2);
+}
+
+.inline-form .field-input {
+    width: 100%;
 }
 
 /* Projects list in details */
@@ -1072,17 +754,29 @@
     font-size: var(--fs-sm);
 }
 
-/* ── Responsive ── */
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE — students.html only
+   Desktop styles above are NOT touched.
+   ═══════════════════════════════════════ */
+
+/* Tablet: stack details into single column */
 @media (max-width: 992px) {
     .student-details-body {
-        gap: var(--sp-8);
+        grid-template-columns: 1fr;
+        gap: var(--sp-6);
     }
 }
 
+/* Medium mobile: collapse details padding, hide score ring */
 @media (max-width: 768px) {
     .student-details-body {
         grid-template-columns: 1fr;
         gap: var(--sp-6);
+        padding: var(--sp-5) var(--sp-4);
+    }
+
+    .detail-column {
+        gap: var(--sp-5);
     }
 
     .student-score {
@@ -1090,43 +784,209 @@
     }
 }
 
-@media (max-width: 480px) {
-    .student-summary {
-        padding: var(--sp-3) var(--sp-4);
-    }
-
-    .detail-edit-row {
-        flex-direction: column;
-    }
-
-    .detail-edit-row .btn {
-        width: 100%;
-    }
-}
-
+/* Small mobile: stack header, reduce card padding */
 @media (max-width: 580px) {
+
+    /* ── Header stacks vertically ── */
     .students-header {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
         gap: var(--sp-3);
     }
 
+    .header-main-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .header-search-area {
+        width: 100%;
+        min-width: unset;
+        flex: unset;
+        justify-content: flex-start;
+    }
+
+    .search-wrap {
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* ── Card summary ── */
     .student-summary {
-        padding: var(--sp-4);
+        padding: var(--sp-3) var(--sp-4);
         gap: var(--sp-3);
-    }
-
-    .student-avatar {
-        width: 44px;
-        height: 44px;
-    }
-
-    .student-rating {
-        display: none;
     }
 
     .student-name {
         font-size: var(--fs-sm);
     }
->>>>>>> 199b10f (added new files)
+
+    .student-role-tag {
+        font-size: 11px;
+    }
+
+    /* Hide star rating to save space */
+    .student-summary .student-rating {
+        display: none;
+    }
+
+    /* ── Expanded details ── */
+    .student-details-body {
+        padding: var(--sp-4) var(--sp-3);
+        gap: var(--sp-4);
+    }
+
+    .detail-column {
+        gap: var(--sp-4);
+    }
+
+    /* ── Footer buttons wrap to two rows ── */
+    .detail-edit-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sp-3);
+        padding: var(--sp-4);
+    }
+
+    .detail-actions-left,
+    .detail-actions-right {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        gap: var(--sp-2);
+        width: 100%;
+    }
+
+    .detail-actions-left .btn,
+    .detail-actions-right .btn {
+        flex: 1;
+        justify-content: center;
+        font-size: var(--fs-xs);
+        padding: 0.45rem 0.75rem;
+    }
+}
+
+/* Extra small: very narrow phones */
+@media (max-width: 400px) {
+
+    /* Container zero-out extra padding */
+    .students-list {
+        gap: var(--sp-3);
+    }
+
+    /* ── Card summary ── */
+    .student-summary {
+        padding: 10px 12px;
+        gap: 8px;
+    }
+
+    .student-avatar {
+        width: 42px;
+        height: 42px;
+        font-size: 1.1rem;
+    }
+
+    .student-avatar-initials {
+        font-size: 1.1rem;
+    }
+
+    .student-name {
+        font-size: 13px;
+    }
+
+    .student-role-tag {
+        font-size: 10.5px;
+    }
+
+    /* ── Expanded details ── */
+    .student-details-body {
+        padding: 14px 12px;
+        gap: 16px;
+    }
+
+    .detail-section-title {
+        font-size: 10px;
+        letter-spacing: 0.08em;
+    }
+
+    /* Profile info badges stretch full width */
+    .hero-meta-item {
+        display: flex;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 7px 10px;
+        font-size: 11.5px;
+        white-space: normal;
+    }
+
+    .meta-text {
+        font-size: 11px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: calc(100% - 24px);
+    }
+
+    /* Progress bars */
+    .progress-label {
+        font-size: 10.5px;
+    }
+
+    /* Skill chips */
+    .skills-chips {
+        gap: 4px;
+    }
+
+    .skill-chip {
+        font-size: 9px;
+        padding: 2px 7px;
+    }
+
+    /* Rating row */
+    .rating-display-row {
+        padding: 8px 10px;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .rating-label {
+        font-size: 10.5px;
+    }
+
+    /* Project card */
+    .pp-title {
+        font-size: 12px;
+    }
+
+    .pp-date {
+        font-size: 10px;
+    }
+
+    .pp-update-text {
+        font-size: 11px;
+    }
+
+    /* Footer buttons stack if needed */
+    .detail-actions-left,
+    .detail-actions-right {
+        gap: 6px;
+    }
+
+    .detail-actions-left .btn,
+    .detail-actions-right .btn {
+        font-size: 10px;
+        padding: 0.4rem 0.6rem;
+    }
 }

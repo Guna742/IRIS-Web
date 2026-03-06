@@ -168,8 +168,6 @@
                 ${sparklineSVG('#f59e0b')}
             </div>
 
-<<<<<<< HEAD
-=======
             <div class="stat-card reveal anim-d5">
                 <div class="stat-card-head">
                     <div class="stat-card-label">Leaderboard Rank</div>
@@ -183,7 +181,6 @@
                 ${sparklineSVG('#FFD700')}
             </div>
 
->>>>>>> 199b10f (added new files)
         </div>
 
         <!-- ═══ CHARTS ROW ═══ -->
@@ -239,13 +236,8 @@
             <div class="history-head">
                 <div class="history-title">Performance Log</div>
                 <div class="history-actions">
-<<<<<<< HEAD
-                    ${isAdmin ? `<a href="students.html" class="btn btn-secondary btn-sm">← Back to Interns</a>` : ''}
-                    <a href="profile-builder.html?student=${p.userId}" class="btn btn-primary btn-sm">✏️ Edit Profile</a>
-=======
                     ${isAdmin ? `<a href="students.html" class="btn btn-secondary btn-sm">← Back to Interns</a>` : `
                     <a href="projects.html" class="btn btn-primary btn-sm">✏️ Edit Project</a>`}
->>>>>>> 199b10f (added new files)
                 </div>
             </div>
             ${projects.length === 0 ? `
@@ -274,14 +266,14 @@
             return `
                     <tr>
                         <td><input type="checkbox" class="row-checkbox" aria-label="Select ${proj.title}"></td>
-                        <td>
+                        <td data-label="Project Details">
                             <div class="proj-col-main">
                                 <span class="proj-name">${proj.title}</span>
                                 <span class="proj-sub">${proj.description ? proj.description.slice(0, 55) + (proj.description.length > 55 ? '…' : '') : 'No description'}</span>
                                 ${stackArr.length ? `<div class="proj-stack-chips">${stackArr.map(t => `<span class="chip">${t}</span>`).join('')}</div>` : ''}
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Performance">
                             ${proj.rating ? `
                                 <div class="rating-display">
                                     <div class="stars" style="color:var(--clr-amber)">${'★'.repeat(proj.rating)}${'☆'.repeat(5 - proj.rating)}</div>
@@ -289,9 +281,9 @@
                                 </div>
                             ` : `<span class="text-muted">No rating</span>`}
                         </td>
-                        <td class="date-col">${proj.createdAt ? fmtDateShort(proj.createdAt) : 'N/A'}</td>
-                        <td><span class="status-pill pill-${status}">${capitalize(status)}</span></td>
-                        <td>
+                        <td data-label="Submitted" class="date-col">${proj.createdAt ? fmtDateShort(proj.createdAt) : 'N/A'}</td>
+                        <td data-label="Status"><span class="status-pill pill-${status}">${capitalize(status)}</span></td>
+                        <td data-label="Role">
                             <div class="owner-cell">
                                 <div class="owner-avatar-sm">${initials}</div>
                                 <div class="owner-info">
@@ -300,7 +292,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Actions">
                             ${proj.liveLink ? `<a href="${proj.liveLink}" target="_blank" rel="noopener" class="more-btn">Live ↗</a>` : `<button class="more-btn">Details</button>`}
                         </td>
                     </tr>`;
@@ -571,24 +563,15 @@
         document.querySelectorAll('.counter-num').forEach(el => {
             const target = parseInt(el.dataset.target, 10);
             const suffix = el.dataset.suffix || '';
-<<<<<<< HEAD
-=======
             const prefix = el.dataset.prefix || '';
->>>>>>> 199b10f (added new files)
             const dur = 900;
             const start = performance.now();
             const step = (now) => {
                 const prog = Math.min((now - start) / dur, 1);
                 const eased = 1 - Math.pow(1 - prog, 3);
-<<<<<<< HEAD
-                el.textContent = Math.floor(eased * target) + suffix;
-                if (prog < 1) requestAnimationFrame(step);
-                else el.textContent = target + suffix;
-=======
                 el.textContent = prefix + Math.floor(eased * target) + suffix;
                 if (prog < 1) requestAnimationFrame(step);
                 else el.textContent = prefix + target + suffix;
->>>>>>> 199b10f (added new files)
             };
             requestAnimationFrame(step);
         });
@@ -716,11 +699,6 @@
         const p = isAdmin ? (Storage.getAdminProfile ? Storage.getAdminProfile(session.userId) : null) : Storage.getProfile(session.userId);
         const currentName = p?.name || session.displayName;
 
-<<<<<<< HEAD
-        if (avatar) avatar.textContent = currentName[0].toUpperCase();
-        if (nameEl) nameEl.textContent = currentName;
-        if (roleEl) roleEl.textContent = isAdmin ? 'Administrator' : 'Intern';
-=======
         if (avatar) {
             if (p?.avatar) {
                 avatar.innerHTML = `<img src="${p.avatar}" alt="${currentName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
@@ -730,15 +708,11 @@
         }
         if (nameEl) nameEl.textContent = currentName;
         if (roleEl) roleEl.textContent = isAdmin ? (p?.role || 'Administrator') : 'Intern';
->>>>>>> 199b10f (added new files)
 
         const nav = document.getElementById('sidebar-nav');
         const items = [
             { label: 'Dashboard', href: 'dashboard.html', icon: '⊞' },
             { label: 'My Profile', href: isAdmin ? 'admin-profile.html' : 'student-profile.html', icon: '👤' },
-<<<<<<< HEAD
-            ...(isAdmin ? [{ label: 'Interns', href: 'students.html', icon: '👥', active: true }] : [{ label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊', active: true }]),
-=======
             ...(isAdmin
                 ? [{ label: 'Interns', href: 'students.html', icon: '👥', active: true }]
                 : [
@@ -746,7 +720,6 @@
                     { label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊', active: true }
                 ]
             ),
->>>>>>> 199b10f (added new files)
             { label: 'Projects', href: 'projects.html', icon: '🗂️' },
         ];
 

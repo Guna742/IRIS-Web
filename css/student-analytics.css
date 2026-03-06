@@ -128,11 +128,7 @@ body::after {
    ══════════════════════════════════════ */
 .stats-row {
     display: grid;
-<<<<<<< HEAD
-    grid-template-columns: repeat(4, 1fr);
-=======
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
->>>>>>> 199b10f (added new files)
     gap: 24px;
     margin-bottom: 24px;
 }
@@ -818,4 +814,136 @@ body::after {
 .reveal.visible {
     opacity: 1;
     transform: none;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════ */
+@media (max-width: 992px) {
+    .charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-row {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .history-table {
+        display: block;
+        width: 100%;
+        overflow-x: hidden;
+        /* Prefer stacking over scrolling */
+    }
+
+    /* Convert table to card view on mobile */
+    .history-table thead {
+        display: none;
+    }
+
+    .history-table tbody {
+        display: flex;
+        flex-direction: column;
+        gap: var(--sp-4);
+    }
+
+    .history-table tr {
+        display: flex;
+        flex-direction: column;
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid var(--clr-border);
+        border-radius: var(--radius-md);
+        padding: var(--sp-4);
+        position: relative;
+    }
+
+    .history-table td {
+        display: flex;
+        align-items: center;
+        padding: var(--sp-2) 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .history-table td:last-child {
+        border-bottom: none;
+    }
+
+    /* Add labels before data */
+    .history-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: var(--fs-xs);
+        color: var(--clr-text-muted);
+        width: 100px;
+        flex-shrink: 0;
+    }
+
+    /* Hide the checkbox column block */
+    .history-table td:first-child {
+        position: absolute;
+        top: var(--sp-4);
+        right: var(--sp-4);
+        padding: 0;
+        border: none;
+    }
+
+    .history-table td:first-child::before {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-row {
+        grid-template-columns: 1fr;
+    }
+
+    .role-banner {
+        padding: var(--sp-4) var(--sp-5);
+    }
+
+    .chart-widget {
+        padding: var(--sp-4) var(--sp-3);
+    }
+
+    .chart-widget-head {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: var(--sp-3);
+    }
+
+    .chart-controls {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 2px;
+        justify-content: flex-start;
+    }
+
+    .bar-row {
+        grid-template-columns: 70px 1fr 34px;
+        gap: 8px;
+        padding: 6px 0;
+    }
+
+    .bar-label {
+        font-size: 10px;
+    }
+
+    .bar-value {
+        text-align: right;
+        font-size: 10px;
+    }
+
+    .history-head {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--sp-3);
+    }
+
+    .chart-axes {
+        padding-left: 36px;
+        padding-right: 20px;
+        font-size: 9px;
+    }
 }

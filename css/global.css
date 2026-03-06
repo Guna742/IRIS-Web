@@ -27,11 +27,6 @@ body {
     color: var(--clr-text-primary);
     background-color: var(--clr-bg-deep);
     overflow-x: hidden;
-<<<<<<< HEAD
-    animation: fadeIn var(--dur-slow) var(--ease-out) both;
-}
-
-=======
     opacity: 0;
     transition: opacity var(--dur-fast) var(--ease-out);
 }
@@ -61,7 +56,6 @@ body.page-exiting {
 }
 
 
->>>>>>> 199b10f (added new files)
 a {
     text-decoration: none;
     color: inherit;
@@ -142,10 +136,7 @@ ol {
     overflow: hidden;
     user-select: none;
     white-space: nowrap;
-<<<<<<< HEAD
-=======
     will-change: transform, opacity;
->>>>>>> 199b10f (added new files)
 }
 
 .btn:active {
@@ -432,7 +423,7 @@ textarea.field-input {
 
 /* ── Sidebar Internals ── */
 .sidebar-brand {
-    padding: var(--sp-5) var(--sp-5);
+    padding: var(--sp-4) var(--sp-5);
     border-bottom: 1px solid var(--glass-border);
     display: flex;
     align-items: center;
@@ -440,20 +431,46 @@ textarea.field-input {
 }
 
 .sidebar-logo {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--clr-accent), var(--clr-indigo));
+    width: 38px;
+    height: 38px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: var(--fs-lg);
     flex-shrink: 0;
+    overflow: hidden;
+}
+
+.sidebar-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 2px;
+}
+
+.sidebar-brand-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .sidebar-title {
     font-size: var(--fs-md);
-    font-weight: var(--fw-bold);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    color: var(--clr-text-primary);
+    line-height: 1.1;
+}
+
+.sidebar-slogan {
+    font-size: 8px;
+    font-weight: 500;
+    color: var(--clr-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin-top: 2px;
     white-space: nowrap;
 }
 
@@ -554,10 +571,7 @@ textarea.field-input {
     font-weight: var(--fw-bold);
     font-size: var(--fs-sm);
     flex-shrink: 0;
-<<<<<<< HEAD
-=======
     overflow: hidden;
->>>>>>> 199b10f (added new files)
 }
 
 .user-meta {
@@ -590,8 +604,6 @@ textarea.field-input {
     gap: var(--sp-3);
 }
 
-<<<<<<< HEAD
-=======
 /* Info Button */
 .info-btn {
     display: flex;
@@ -620,7 +632,6 @@ textarea.field-input {
     height: 18px;
 }
 
->>>>>>> 199b10f (added new files)
 .topbar-title {
     font-size: var(--fs-md);
     font-weight: var(--fw-semi);
@@ -661,8 +672,6 @@ textarea.field-input {
     font-size: var(--fs-sm);
 }
 
-<<<<<<< HEAD
-=======
 /* ── Role Status Banner ── */
 .role-banner {
     display: flex;
@@ -830,7 +839,6 @@ textarea.field-input {
     gap: 4px;
 }
 
->>>>>>> 199b10f (added new files)
 /* ── Toast ── */
 .toast-container {
     position: fixed;

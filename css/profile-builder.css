@@ -268,7 +268,7 @@
 }
 
 /* ── Responsive ── */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .fields-grid-2 {
         grid-template-columns: 1fr;
     }
