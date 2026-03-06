@@ -34,19 +34,6 @@
   const adminProfile = isAdmin ? (Storage.getAdminProfile ? Storage.getAdminProfile(session.userId) : null) : null;
   const userProfile = !isAdmin ? Storage.getProfile(session.userId) : null;
   const currentName = (isAdmin ? adminProfile?.name : userProfile?.name) || session.displayName;
-<<<<<<< HEAD
-
-  if (userAvatarSb) userAvatarSb.textContent = currentName[0].toUpperCase();
-  if (userNameSb) userNameSb.textContent = currentName;
-  if (userRoleSb) userRoleSb.textContent = isAdmin ? 'Administrator' : 'Intern';
-
-  // Role banner
-  if (welcomeTitle) welcomeTitle.textContent = `Welcome back, ${currentName}!`;
-  if (welcomeSub) welcomeSub.textContent = isAdmin
-    ? 'You have full admin access. Build profiles and manage intern performance.'
-    : 'Track your performance and explore your project workspace.';
-  if (roleBanner) roleBanner.classList.add(session.role);
-=======
   const currentAvatar = isAdmin ? adminProfile?.avatar : userProfile?.avatar;
 
   if (userAvatarSb) {
@@ -72,7 +59,6 @@
     roleBanner.classList.add(session.role);
     roleBanner.classList.add('anim-reveal');
   }
->>>>>>> 199b10f (added new files)
 
   const roleBadgeClass = isAdmin ? 'badge-admin' : 'badge-user';
   [roleBadgeMain, topbarRoleBadge].forEach(el => {
@@ -84,15 +70,6 @@
   const NAV_INTERN = [
     { label: 'Dashboard', href: 'dashboard.html', icon: '⊞', active: true },
     { label: 'My Profile', href: 'student-profile.html', icon: '👤' },
-<<<<<<< HEAD
-    { label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊' },
-    { label: 'Projects', href: 'projects.html', icon: '🗂️' },
-  ];
-  const NAV_ADMIN = [
-    { label: 'Dashboard', href: 'dashboard.html', icon: '⊞', active: true },
-    { label: 'My Profile', href: 'admin-profile.html', icon: '👤' },
-    { label: 'Interns', href: 'students.html', icon: '🎓' },
-=======
     { label: 'Leaderboard', href: 'leaderboard.html', icon: '🏆' },
     { label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊' },
     { label: 'Projects', href: 'projects.html', icon: '🗂️' },
@@ -102,7 +79,6 @@
     { label: 'Dashboard', href: 'dashboard.html', icon: '⊞', active: true },
     { label: 'My Profile', href: 'admin-profile.html', icon: '👤' },
     { label: 'Interns', href: 'students.html', icon: '👥' },
->>>>>>> 199b10f (added new files)
     { label: 'Projects', href: 'projects.html', icon: '🗂️' },
   ];
 
@@ -123,48 +99,21 @@
   const profile = Storage.getProfile(session.userId) || { skills: [] };
 
   const STATS_ADMIN = [
-<<<<<<< HEAD
-    { label: 'Total Projects', value: projects.length, icon: '🗂️', color: 'accent', trend: '+2 this week', clickable: true },
-    { label: 'Interns', value: Object.keys(Storage.getProfiles()).length, icon: '👥', color: 'cyan', trend: 'Active' },
-=======
     { label: 'Total Projects', value: projects.length, icon: '🗂️', color: 'accent', trend: '+2 this week', clickable: true, href: 'projects.html' },
     { label: 'Interns', value: Object.keys(Storage.getProfiles()).length, icon: '👥', color: 'cyan', trend: 'Active', clickable: true, href: 'students.html' },
->>>>>>> 199b10f (added new files)
     { label: 'Avg Skills', value: 8, icon: '⚡', color: 'violet', trend: 'Growing' },
     { label: 'Completion', value: 87, suffix: '%', icon: '✅', color: 'success', trend: '+5% week' },
   ];
   const STATS_USER = [
-<<<<<<< HEAD
-    { label: 'My Projects', value: projects.length, icon: '🗂️', color: 'accent', trend: 'Active', clickable: true },
-    { label: 'Skills', value: profile.skills.length, icon: '⚡', color: 'cyan', trend: 'Listed' },
-    { label: 'Internship', value: 1, icon: '🏢', color: 'violet', trend: 'In progress' },
-    { label: 'Days Left', value: 42, icon: '📅', color: 'success', trend: 'On track' },
-=======
     { label: 'My Projects', value: projects.length, icon: '🗂️', color: '#8b5cf6', trend: 'Active', clickable: true, href: 'projects.html' },
     { label: 'Skills', value: profile.skills.length, icon: '⚡', color: '#22d3ee', trend: 'Listed' },
     { label: 'Internship', value: 1, icon: '🏢', color: '#a855f7', trend: 'In progress' },
     { label: 'Days Left', value: 42, icon: '📅', color: '#10b981', trend: 'On track' },
->>>>>>> 199b10f (added new files)
   ];
 
   const stats = isAdmin ? STATS_ADMIN : STATS_USER;
 
   statsGrid.innerHTML = stats.map((s, i) => `
-<<<<<<< HEAD
-    <div class="stat-card c-${s.color} anim-fadeInUp anim-d${i + 1} ${s.clickable ? 'clickable-stat' : ''}" 
-         role="figure" aria-label="${s.label}: ${s.value}${s.suffix || ''}"
-         ${s.clickable ? 'onclick="window.location.href=\'projects.html\'"' : ''}>
-      <div class="stat-icon c-${s.color}" aria-hidden="true">${s.icon}</div>
-      <div class="stat-value">
-        <span class="counter-num" data-target="${s.value}">${s.value}</span>
-        ${s.suffix ? `<span class="stat-suffix">${s.suffix}</span>` : ''}
-      </div>
-      <div class="stat-label">${s.label}</div>
-      <span class="stat-trend">${s.trend}</span>
-    </div>
-  `).join('');
-
-=======
     <div class="stat-card reveal anim-d${i + 1} card-3d ${s.clickable ? 'clickable-stat' : ''}" 
          role="figure" aria-label="${s.label}: ${s.value}${s.suffix || ''}"
          ${s.clickable ? `onclick="window.location.href='${s.href}'"` : ''}>
@@ -197,7 +146,6 @@
     return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>`;
   }
 
->>>>>>> 199b10f (added new files)
   // Animated counters
   function animateCounters() {
     document.querySelectorAll('.counter-num').forEach(el => {
@@ -238,19 +186,12 @@
 
   const actions = isAdmin ? ACTIONS_ADMIN : ACTIONS_USER;
   quickActions.innerHTML = actions.map(a => `
-<<<<<<< HEAD
-    <a class="action-tile" href="${a.href}" aria-label="${a.label} — ${a.desc}">
-      <div class="action-icon" style="background:${a.color}" aria-hidden="true">${a.icon}</div>
-      <div class="action-label">${a.label}</div>
-      <div class="action-desc">${a.desc}</div>
-=======
     <a class="action-tile btn-magnetic" href="${a.href}" aria-label="${a.label} — ${a.desc}">
       <div class="action-icon" style="background:${a.color}" aria-hidden="true">${a.icon}</div>
       <div class="action-content">
         <div class="action-label">${a.label}</div>
         <div class="action-desc">${a.desc}</div>
       </div>
->>>>>>> 199b10f (added new files)
       <svg class="arrow-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
     </a>
   `).join('');
@@ -260,16 +201,10 @@
   if (recent.length === 0) {
     recentProjList.innerHTML = `<p class="text-muted text-sm" style="padding:var(--sp-4) 0">No projects yet.</p>`;
   } else {
-<<<<<<< HEAD
-    recentProjList.innerHTML = recent.map(p => `
-      <div class="proj-item">
-        <div class="proj-thumb" aria-hidden="true">
-=======
     recentProjList.innerHTML = recent.map((p, i) => `
       <div class="proj-item anim-stagger card-3d" style="transition-delay: ${i * 0.15}s">
         <div class="glare" aria-hidden="true"></div>
         <div class="proj-thumb" style="background:${p.screenshot ? 'none' : (['#4285F4', '#34A853', '#EA4335', '#FBBC05'][i % 4])}" aria-hidden="true">
->>>>>>> 199b10f (added new files)
           ${p.screenshot
         ? `<img src="${p.screenshot}" alt="${p.title} thumbnail">`
         : p.title[0]}
@@ -278,13 +213,6 @@
           <div class="proj-name">${p.title}</div>
           <div class="proj-tech">${(p.techStack || []).slice(0, 3).join(' · ')}</div>
         </div>
-<<<<<<< HEAD
-        ${p.liveLink ? `<a class="proj-link" href="${p.liveLink}" target="_blank" rel="noopener" aria-label="Live demo for ${p.title}">Live ↗</a>` : ''}
-      </div>
-    `).join('');
-  }
-
-=======
         ${p.liveLink ? `<a class="proj-link btn-magnetic" href="${p.liveLink}" target="_blank" rel="noopener" aria-label="Live demo for ${p.title}">Live ↗</a>` : ''}
       </div>
     `).join('');
@@ -301,7 +229,6 @@
   if (typeof initScrollReveals === 'function') initScrollReveals();
   if (typeof initTextReveals === 'function') initTextReveals();
 
->>>>>>> 199b10f (added new files)
   // ── Sidebar toggle (mobile) ──
   function openSidebar() {
     appSidebar.classList.add('open');

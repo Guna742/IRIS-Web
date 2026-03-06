@@ -118,9 +118,9 @@
                 </a>`
                 : ''}
             ${p.liveLink
-                ? `<a class="card-link live" href="${p.liveLink}" target="_blank" rel="noopener" aria-label="Live demo for ${p.title}">
+                ? `<a class="card-link live" href="${p.liveLink}" target="_blank" rel="noopener" aria-label="${p.liveLinkType === 'Demo' ? 'Demo' : 'Live demo'} for ${p.title}">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                  Live Demo
+                  ${p.liveLinkType === 'Demo' ? 'Demo URL' : 'Live Demo'}
                 </a>`
                 : ''}
           </div>
@@ -202,6 +202,11 @@
         projDesc.value = '';
         projGithub.value = '';
         projLive.value = '';
+        const linkTypeEl = document.getElementById('proj-link-type');
+        if (linkTypeEl) {
+            linkTypeEl.value = 'Live';
+            linkTypeEl.dispatchEvent(new Event('change'));
+        }
         stackTags = [];
         renderStackTags();
         clearScreenshot();
@@ -221,6 +226,11 @@
             projDesc.value = p.description;
             projGithub.value = p.githubLink || '';
             projLive.value = p.liveLink || '';
+            const linkTypeEl = document.getElementById('proj-link-type');
+            if (linkTypeEl) {
+                linkTypeEl.value = p.liveLinkType || 'Live';
+                linkTypeEl.dispatchEvent(new Event('change'));
+            }
             stackTags = [...(p.techStack || [])];
             renderStackTags();
             if (p.screenshot) {
@@ -328,6 +338,7 @@
             status: projStatus.value,
             githubLink: projGithub.value.trim() || '',
             liveLink: projLive.value.trim() || '',
+            liveLinkType: document.getElementById('proj-link-type') ? document.getElementById('proj-link-type').value : 'Live',
             screenshot: screenshotB64 || '',
             ownerId: isUser ? session.userId : null,
             ownerName: isUser ? session.name : null,
@@ -403,11 +414,6 @@
         const p = isAdmin ? (Storage.getAdminProfile ? Storage.getAdminProfile(session.userId) : null) : Storage.getProfile(session.userId);
         const currentName = p?.name || session.displayName;
 
-<<<<<<< HEAD
-        if (avatar) avatar.textContent = currentName[0].toUpperCase();
-        if (nameEl) nameEl.textContent = currentName;
-        if (roleEl) roleEl.textContent = isAdmin ? 'Administrator' : 'Intern';
-=======
         if (avatar) {
             if (p?.avatar) {
                 avatar.innerHTML = `<img src="${p.avatar}" alt="${currentName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
@@ -417,14 +423,10 @@
         }
         if (nameEl) nameEl.textContent = currentName;
         if (roleEl) roleEl.textContent = isAdmin ? (p?.role || 'Administrator') : 'Intern';
->>>>>>> 199b10f (added new files)
 
         const items = [
             { label: 'Dashboard', href: 'dashboard.html', icon: '⊞' },
             { label: 'My Profile', href: isAdmin ? 'admin-profile.html' : 'student-profile.html', icon: '👤' },
-<<<<<<< HEAD
-            ...(isAdmin ? [{ label: 'Interns', href: 'students.html', icon: '👥' }] : [{ label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊' }]),
-=======
             ...(isAdmin
                 ? [{ label: 'Interns', href: 'students.html', icon: '👥' }]
                 : [
@@ -432,7 +434,6 @@
                     { label: 'My Analytics', href: `student-analytics.html?student=${session.userId}`, icon: '📊' }
                 ]
             ),
->>>>>>> 199b10f (added new files)
             { label: 'Projects', href: 'projects.html', icon: '🗂️', active: true },
         ];
 

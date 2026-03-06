@@ -15,17 +15,6 @@
     // Logout
     document.getElementById('logout-btn').addEventListener('click', () => Auth.logout());
 
-<<<<<<< HEAD
-    // ── Populate admin info ──
-    const adminProfile = Storage.getAdminProfile ? Storage.getAdminProfile(session.userId) : null;
-    const displayName = adminProfile?.name || session.displayName || 'Admin';
-    const email = session.email || '';
-
-    setEl('admin-display-name', displayName);
-    setEl('admin-avatar', displayName[0].toUpperCase());
-    setEl('admin-email', email);
-    setEl('info-email', email);
-=======
     // ── Edit Profile Button (Scroll to Account Info) ──
     const editProfileBtn = document.getElementById('edit-profile-btn');
     if (editProfileBtn) {
@@ -84,7 +73,6 @@
     }
 
     updateProfileUI();
->>>>>>> 199b10f (added new files)
 
     // Session time
     if (session.loginTime) {
@@ -94,12 +82,6 @@
         }));
     }
 
-<<<<<<< HEAD
-    // ── Name editor ──
-    const nameField = document.getElementById('name-edit-field');
-    const nameSaveBtn = document.getElementById('name-save-btn');
-    if (nameField) nameField.value = displayName;
-=======
     // ── Field Editors ──
     const nameField = document.getElementById('name-edit-field');
     const nameSaveBtn = document.getElementById('name-save-btn');
@@ -120,39 +102,11 @@
         localStorage.setItem('interntrack_session', JSON.stringify(updatedSession));
         updateProfileUI();
     }
->>>>>>> 199b10f (added new files)
 
     if (nameSaveBtn) {
         nameSaveBtn.addEventListener('click', () => {
             const newName = nameField.value.trim();
             if (!newName) { showToast('Name cannot be empty.', 'error'); return; }
-<<<<<<< HEAD
-
-            // Update session in storage
-            const updatedSession = { ...session, displayName: newName };
-            sessionStorage.setItem('interntrack_session', JSON.stringify(updatedSession));
-            localStorage.setItem('interntrack_session', JSON.stringify(updatedSession));
-
-            // Update header
-            setEl('admin-display-name', newName);
-            setEl('admin-avatar', newName[0].toUpperCase());
-            setEl('user-name-sidebar', newName);
-            const sideAvatar = document.getElementById('user-avatar-sidebar');
-            if (sideAvatar) sideAvatar.textContent = newName[0].toUpperCase();
-
-            nameSaveBtn.textContent = '✓ Saved';
-            nameSaveBtn.style.color = 'var(--clr-success, #10b981)';
-            showToast('Display name updated!', 'success');
-            setTimeout(() => {
-                nameSaveBtn.textContent = 'Save';
-                nameSaveBtn.style.color = '';
-            }, 2000);
-        });
-
-        // Allow Enter key in field
-        nameField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') nameSaveBtn.click();
-=======
             currentAdminData.name = newName;
             saveAdminData();
             showToast('Display name updated!', 'success');
@@ -218,7 +172,6 @@
                 saveAdminData();
                 showToast('Profile photo removed.', 'success');
             }
->>>>>>> 199b10f (added new files)
         });
     }
 
@@ -266,8 +219,6 @@
         }
     }
 
-<<<<<<< HEAD
-=======
     // ── Apply interactions ──
     const heroCard = document.getElementById('admin-hero');
     if (heroCard) {
@@ -298,7 +249,6 @@
     if (typeof initScrollReveals === 'function') initScrollReveals();
     if (typeof initTextReveals === 'function') initTextReveals();
 
->>>>>>> 199b10f (added new files)
     // ── Recent Projects Removed ──
 
     // ── Scroll Reveal ──
@@ -308,15 +258,9 @@
     // Helpers
     // ─────────────────────────────────────────────────────
 
-<<<<<<< HEAD
-    function setEl(id, text) {
-        const el = document.getElementById(id);
-        if (el) el.textContent = text;
-=======
     function setEl(id, html) {
         const el = document.getElementById(id);
         if (el) el.innerHTML = html;
->>>>>>> 199b10f (added new files)
     }
 
     function animateCounter(id, target, delay = 0) {
@@ -369,9 +313,6 @@
         const p = isAdmin ? (Storage.getAdminProfile ? Storage.getAdminProfile(session.userId) : null) : Storage.getProfile(session.userId);
         const currentName = p?.name || session.displayName;
 
-<<<<<<< HEAD
-        if (avatar) avatar.textContent = currentName[0].toUpperCase();
-=======
         if (avatar) {
             if (p?.avatar) {
                 avatar.innerHTML = `<img src="${p.avatar}" alt="${currentName}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
@@ -379,7 +320,6 @@
                 avatar.textContent = currentName[0].toUpperCase();
             }
         }
->>>>>>> 199b10f (added new files)
         if (nameEl) nameEl.textContent = currentName;
         if (roleEl) roleEl.textContent = 'Administrator';
 

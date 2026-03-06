@@ -158,8 +158,6 @@ const Storage = (() => {
         localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
     }
 
-<<<<<<< HEAD
-=======
     function deleteProfile(userId) {
         const profiles = getProfiles();
         if (profiles[userId]) {
@@ -173,7 +171,6 @@ const Storage = (() => {
         return false;
     }
 
->>>>>>> 199b10f (added new files)
     // ── Projects ──
     function getProjects() {
         try {
@@ -206,9 +203,6 @@ const Storage = (() => {
         return getProjects().find(p => p.id === id) || null;
     }
 
-<<<<<<< HEAD
-    return { seed, getProfiles, getProfile, saveProfile, getProjects, saveProject, deleteProject, getProjectById };
-=======
     // ── Admin Profiles ──
     const ADMIN_KEY = 'interntrack_admin';
     function getAdminProfile(userId) {
@@ -269,7 +263,6 @@ const Storage = (() => {
         computeInternScore,
         getInternRank
     };
->>>>>>> 199b10f (added new files)
 })();
 
 // Auto-seed on load
