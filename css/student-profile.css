@@ -874,26 +874,91 @@ body.theme-instagram .completion-pct {
     font-size: 1.05rem;
 }
 
-.skill-range-wrap {
+.slider-wrapper {
     background: rgba(255, 255, 255, 0.03);
-    padding: 24px;
+    padding: 30px 24px 20px 24px;
     border-radius: var(--radius-md);
     border: 1px solid var(--clr-border);
-    text-align: center;
 }
 
 .skill-range-val {
     font-size: 2.5rem;
     font-weight: 800;
-    color: var(--clr-purple-light);
-    margin-bottom: 16px;
+    color: var(--clr-text-primary);
+    margin-bottom: 24px;
     text-shadow: 0 0 15px var(--clr-purple-glow);
+    text-align: center;
 }
 
-.skill-slider {
+.slider-container {
+    position: relative;
     width: 100%;
-    margin: 10px 0;
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.slider-track {
+    position: absolute;
+    height: 6px;
+    width: 100%;
+    background: var(--clr-border);
+    border-radius: 10px;
+}
+
+.slider-range {
+    position: absolute;
+    height: 6px;
+    background: #2563eb;
+    border-radius: 10px;
+}
+
+.custom-range-slider {
+    position: absolute;
+    width: 100%;
+    background: transparent;
+    -webkit-appearance: none;
+    appearance: none;
+    pointer-events: auto;
+    z-index: 2;
+    margin: 0;
+    outline: none;
+}
+
+.custom-range-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    background: #2563eb;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     cursor: pointer;
+    margin-top: 0px;
+}
+
+.custom-range-slider::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    background: #2563eb;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    border: none;
+}
+
+.value-bubble {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    transition: transform 0.15s ease, opacity 0.15s ease;
+    display: none;
+    /* User's JS had bubble, but screenshot had it hidden. Keeping it hidden to match screenshot's clean look since skill-range-val shows value */
 }
 
 .skill-range-labels {
@@ -901,7 +966,7 @@ body.theme-instagram .completion-pct {
     justify-content: space-between;
     font-size: 0.75rem;
     color: var(--clr-text-muted);
-    margin-top: 8px;
+    margin-top: 20px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -925,12 +990,11 @@ body.theme-instagram .completion-pct {
 
 .skill-pct-tag {
     font-size: 0.65rem;
-    font-weight: 700;
-    background: var(--clr-purple-light);
-    color: #fff;
-    padding: 2px 6px;
-    border-radius: 4px;
-    opacity: 0.9;
+    font-weight: 800;
+    color: var(--clr-text-primary);
+    background: transparent;
+    padding: 0 4px;
+    opacity: 0.85;
 }
 
 .skill-remove-btn {

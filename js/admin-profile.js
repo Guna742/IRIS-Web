@@ -64,7 +64,7 @@
         if (currentAdminData.avatar) {
             avatarEl.innerHTML = `<img src="${currentAdminData.avatar}" alt="${currentAdminData.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
         } else {
-            avatarEl.innerHTML = `<span class="material-symbols-outlined" style="font-size: 40px; color:rgba(255,255,255,0.4)">photo_camera</span>`;
+            avatarEl.innerHTML = `<span>${currentAdminData.name[0].toUpperCase()}</span>`;
         }
     }
 
@@ -132,44 +132,7 @@
         roleField.addEventListener('keydown', (e) => { if (e.key === 'Enter') roleSaveBtn.click(); });
     }
 
-    // ── Avatar Upload Logic ──
-    const uploadTrigger = document.getElementById('avatar-upload-trigger');
-    const avatarInput = document.getElementById('admin-avatar-input');
-
-    const removeAvatarBtn = document.getElementById('avatar-remove-btn');
-
-    if (avatarInput) {
-        avatarInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('Image too large. Max 2MB.', 'error');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                currentAdminData.avatar = ev.target.result;
-                saveAdminData();
-                showToast('Profile photo updated!', 'success');
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    if (removeAvatarBtn) {
-        removeAvatarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!currentAdminData.avatar) {
-                showToast('No photo to remove.', 'info');
-                return;
-            }
-            if (confirm('Remove profile photo?')) {
-                currentAdminData.avatar = '';
-                saveAdminData();
-                showToast('Profile photo removed.', 'success');
-            }
-        });
-    }
+    // ── Avatar Upload Logic removed ──
 
     // ── Compute & render stats ──
     const profiles = Storage.getProfiles();

@@ -136,25 +136,7 @@
                             <div class="accordion-body" id="body-personal">
                                 <div class="accordion-inner">
                                     <div class="accordion-content">
-                                        <!-- Avatar -->
-                                        <div class="field-group">
-                                            <label class="field-label">Profile Picture</label>
-                                            <div class="avatar-upload">
-                                                <div class="avatar-preview" id="avatar-preview"
-                                                    aria-label="Avatar preview">
-                                                    J</div>
-                                                <div class="avatar-upload-btn">
-                                                    <label class="avatar-upload-label" for="avatar-file">
-                                                        <span class="material-symbols-outlined"
-                                                            style="font-size: 14px;">image</span>
-                                                        Upload Photo
-                                                    </label>
-                                                    <input type="file" id="avatar-file" accept="image/*"
-                                                        aria-label="Upload profile picture">
-                                                    <span class="tags-hint">JPG, PNG, GIF · Max 2MB</span>
-                                                </div>
-                                            </div>
-                                        </div>
+
 
                                         <div class="fields-grid-2">
                                             <div class="field-group">
@@ -259,8 +241,11 @@
                                         <div class="fields-grid-2">
                                             <div class="field-group">
                                                 <label class="field-label" for="field-company">Company Name</label>
-                                                <input class="field-input" type="text" id="field-company"
-                                                    placeholder="e.g. TechVentures Inc.">
+                                                <select class="field-input" id="field-company">
+                                                    <option value="">Select Company</option>
+                                                    <option value="FortuMars">FortuMars</option>
+                                                    <option value="Cognithorz">Cognithorz</option>
+                                                </select>
                                             </div>
                                             <div class="field-group">
                                                 <label class="field-label" for="field-role">Role / Title</label>
@@ -270,10 +255,6 @@
                                             <div class="field-group">
                                                 <label class="field-label" for="field-start">Start Date</label>
                                                 <input class="field-input" type="date" id="field-start">
-                                            </div>
-                                            <div class="field-group">
-                                                <label class="field-label" for="field-end">End Date</label>
-                                                <input class="field-input" type="date" id="field-end">
                                             </div>
                                         </div>
                                         <div class="field-group">

@@ -18,8 +18,7 @@
     const saveStatus = document.getElementById('save-status');
     const saveStatusText = document.getElementById('save-status-text');
     const saveStatusIcon = document.getElementById('save-status-icon');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const avatarFile = document.getElementById('avatar-file');
+
     const tagsList = document.getElementById('tags-list');
     const tagsInput = document.getElementById('skills-input');
     const skillsCountBadge = document.getElementById('skills-count-badge');
@@ -99,12 +98,7 @@
         getField('bio').value = p.bio || '';
         getField('github').value = p.socialLinks?.github || '';
         getField('linkedin').value = p.socialLinks?.linkedin || '';
-        // Avatar
-        if (p.avatar) {
-            setAvatarPreview(p.avatar);
-        } else {
-            avatarPreview.textContent = (p.name || 'J')[0].toUpperCase();
-        }
+        // Avatar logic removed
         // Skills
         renderTags();
         // Internship
@@ -112,31 +106,12 @@
         getField('company').value = i.company || '';
         getField('role').value = i.role || '';
         getField('start').value = i.startDate || '';
-        getField('end').value = i.endDate || '';
         getField('intern-desc').value = i.description || '';
     }
 
     function getField(id) { return document.getElementById('field-' + id); }
 
-    // ── Avatar upload ──
-    avatarFile.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Image too large. Max size is 2MB.', 'error');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = ev => {
-            profile.avatar = ev.target.result;
-            setAvatarPreview(ev.target.result);
-            markUnsaved();
-        };
-        reader.readAsDataURL(file);
-    });
-    function setAvatarPreview(src) {
-        avatarPreview.innerHTML = `<img src="${src}" alt="Avatar preview">`;
-    }
+
 
     // ── Tag chip system ──
     function renderTags() {
@@ -220,7 +195,6 @@
                 company: getField('company').value.trim(),
                 role: getField('role').value.trim(),
                 startDate: getField('start').value,
-                endDate: getField('end').value,
                 description: getField('intern-desc').value.trim(),
                 technologies: skills.slice(0, 4),
             }

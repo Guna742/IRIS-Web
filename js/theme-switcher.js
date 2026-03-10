@@ -29,13 +29,6 @@
       icon: 'photo_camera',
       palette: ['#833ab4', '#fd1d1d', '#fcb045'],
     },
-    {
-      id: 'nature',
-      label: 'Nature',
-      description: 'Clean light theme with green accents',
-      icon: 'eco',
-      palette: ['#f0f8ff', '#ffffff', '#22c55e'],
-    },
   ];
 
   const STORAGE_KEY = 'interntrack_theme';
@@ -82,11 +75,8 @@
       }
       /* Kill the background glow orbs and aurora for light themes */
       body.theme-google .bg-wrap,
-      body.theme-nature .bg-wrap,
       body.theme-google::before,
-      body.theme-google::after,
-      body.theme-nature::before,
-      body.theme-nature::after { display: none !important; }
+      body.theme-google::after { display: none !important; }
       body.theme-google .app-sidebar {
         background: #ffffff;
         border-right: 1px solid #e0e0e0;
@@ -842,197 +832,7 @@
         background-image: none !important;
         pointer-events: none !important;
       }
-      /* ── Theme Variables: Nature (Shadcn UI) ── */
-      body.theme-nature {
-        --card: #ffffff;
-        --ring: #22c55e;
-        --input: #e5e7eb;
-        --muted: #f3f4f6;
-        --accent: #d1fae5;
-        --border: #e5e7eb;
-        --radius: 0.5rem;
-        --chart-1: #22c55e;
-        --chart-2: #10b981;
-        --chart-3: #059669;
-        --chart-4: #047857;
-        --chart-5: #065f46;
-        --popover: #ffffff;
-        --primary: #22c55e;
-        --sidebar: #e0f2fe;
-        --font-mono: IBM Plex Mono, monospace;
-        --font-sans: DM Sans, sans-serif;
-        --secondary: #e0f2fe;
-        --background: #f0f8ff;
-        --font-serif: Lora, serif;
-        --foreground: #374151;
-        --destructive: #ef4444;
-        --shadow-blur: 8px;
-        --shadow-color: hsl(0 0% 0%);
-        --sidebar-ring: #22c55e;
-        --shadow-spread: -1px;
-        --shadow-opacity: 0.1;
-        --sidebar-accent: #d1fae5;
-        --sidebar-border: #e5e7eb;
-        --card-foreground: #374151;
-        --shadow-offset-x: 0px;
-        --shadow-offset-y: 4px;
-        --sidebar-primary: #22c55e;
-        --muted-foreground: #6b7280;
-        --accent-foreground: #374151;
-        --popover-foreground: #374151;
-        --primary-foreground: #ffffff;
-        --sidebar-foreground: #374151;
-        --secondary-foreground: #4b5563;
-        --destructive-foreground: #ffffff;
-        --sidebar-accent-foreground: #374151;
-        --sidebar-primary-foreground: #ffffff;
 
-        --clr-bg-deep:        var(--background);
-        --clr-bg-mid:         var(--card);
-        --clr-bg-surface:     var(--sidebar);
-        --clr-bg-elevated:    var(--popover);
-        --clr-accent:         var(--primary);
-        --clr-accent-glow:    rgba(34,197,94,.15);
-        --clr-accent-hover:   #16a34a;
-        --clr-text-primary:   var(--foreground);
-        --clr-text-secondary: var(--muted-foreground);
-        --clr-text-muted:     var(--muted-foreground);
-        --clr-text-inverse:   var(--primary-foreground);
-
-        --radius-xl: var(--radius);
-        --radius-lg: var(--radius);
-
-        background-color: var(--background) !important;
-        background-image: none !important;
-        color: var(--foreground) !important;
-      }
-      body.theme-nature .bg-wrap { display: none !important; }
-      body.theme-nature .app-sidebar {
-        background: var(--sidebar);
-        border-right: 1px solid var(--sidebar-border);
-      }
-      body.theme-nature .app-topbar {
-        background: var(--background);
-        border-bottom: 1px solid var(--border);
-      }
-      body.theme-nature .nav-item.active {
-        background: var(--sidebar-accent);
-        color: var(--sidebar-accent-foreground);
-        border-radius: var(--radius);
-      }
-      body.theme-nature .nav-item.active .material-symbols-outlined { color: var(--sidebar-accent-foreground); }
-      
-      body.theme-nature .btn-primary {
-        background: var(--primary);
-        color: var(--primary-foreground);
-        border-radius: var(--radius);
-      }
-      body.theme-nature .btn-primary:hover {
-        opacity: 0.9;
-      }
-
-      body.theme-nature .card, 
-      body.theme-nature .dash-card,
-      body.theme-nature .stat-card,
-      body.theme-nature .chart-widget,
-      body.theme-nature .history-section,
-      body.theme-nature .admin-section,
-      body.theme-nature .auth-card {
-        background: var(--card) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--radius) !important;
-        color: var(--card-foreground) !important;
-        box-shadow: var(--shadow-offset-x) var(--shadow-offset-y) var(--shadow-blur) var(--shadow-spread) rgba(0,0,0,var(--shadow-opacity)) !important;
-      }
-      
-      body.theme-nature .dash-card-header,
-      body.theme-nature .dashboard-title,
-      body.theme-nature .stat-value,
-      body.theme-nature .hero-headline,
-      body.theme-nature .card-title,
-      body.theme-nature .auth-title,
-      body.theme-nature .auth-subtitle,
-      body.theme-nature .admin-section-title,
-      body.theme-nature .admin-display-name,
-      body.theme-nature .quick-action-label,
-      body.theme-nature .quick-action-icon,
-      body.theme-nature .student-name,
-      body.theme-nature .project-title,
-      body.theme-nature .btn-secondary,
-      body.theme-nature table th,
-      body.theme-nature table td {
-        color: var(--card-foreground) !important;
-        -webkit-text-fill-color: var(--card-foreground) !important;
-      }
-
-      body.theme-nature .stat-label, 
-      body.theme-nature .hero-desc,
-      body.theme-nature .quick-action-desc,
-      body.theme-nature .admin-info-label,
-      body.theme-nature .project-desc,
-      body.theme-nature .student-university {
-        color: var(--muted-foreground) !important;
-      }
-
-      body.theme-nature .sidebar-logo {
-        background: var(--sidebar-primary) !important;
-        color: var(--primary-foreground) !important;
-        border-radius: var(--radius) !important;
-      }
-      body.theme-nature .sidebar-logo img {
-        filter: grayscale(100%) contrast(200%);
-      }
-      body.theme-nature .sidebar-title {
-        color: var(--sidebar-foreground) !important;
-        font-weight: 800 !important;
-      }
-
-      body.theme-nature .stat-bar,
-      body.theme-nature .progress-fill,
-      body.theme-nature .stat-icon {
-        background: var(--primary) !important;
-        color: var(--primary-foreground) !important;
-      }
-      
-      body.theme-nature .progress-track,
-      body.theme-nature .completion-bar {
-        background: var(--muted) !important;
-      }
-
-      body.theme-nature .field-input {
-        background: var(--input);
-        border: 1px solid var(--border);
-        color: var(--foreground);
-        border-radius: var(--radius);
-      }
-
-      body.theme-nature .chip,
-      body.theme-nature .role-tag,
-      body.theme-nature .student-role-tag,
-      body.theme-nature .admin-role-tag,
-      body.theme-nature .feature-pill {
-        background: var(--secondary) !important;
-        color: var(--secondary-foreground) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--radius) !important;
-      }
-      
-      body.theme-nature .user-avatar, 
-      body.theme-nature .student-avatar, 
-      body.theme-nature .admin-avatar,
-      body.theme-nature #theme-switcher-fab {
-        background: var(--primary) !important;
-        color: var(--primary-foreground) !important;
-      }
-      
-      body.theme-nature .btn-secondary {
-        background: var(--secondary) !important;
-        color: var(--secondary-foreground) !important;
-        border: 1px solid var(--border) !important;
-      }
-
-      body.theme-nature ::-webkit-scrollbar-track { background: var(--background); }
-      body.theme-nature ::-webkit-scrollbar-thumb { background: var(--muted-foreground); border-radius: var(--radius); }
 
     `;
     document.head.appendChild(style);
@@ -1083,7 +883,7 @@
   function applyTheme(themeId, save = true) {
     const body = document.body;
     // Remove old theme classes
-    body.classList.remove('theme-default', 'theme-google', 'theme-instagram', 'theme-emerald', 'theme-nature');
+    body.classList.remove('theme-default', 'theme-google', 'theme-instagram', 'theme-emerald');
     if (themeId !== 'default') {
       body.classList.add(`theme-${themeId}`);
     }

@@ -102,17 +102,8 @@
                         <div class="student-avatar" id="student-avatar" aria-label="${p.name || 'Intern'} avatar">
                             ${p.avatar
                 ? `<img src="${p.avatar}" alt="${p.name} profile picture" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`
-                : `<span class="material-symbols-outlined" style="font-size: 40px; color:rgba(255,255,255,0.4)">photo_camera</span>`}
+                : `<span>${(p.name || 'I')[0].toUpperCase()}</span>`}
                         </div>
-                        <label class="avatar-upload-trigger" for="student-avatar-input" title="Change Photo">
-                            <div class="student-avatar-overlay">
-                                <span class="material-symbols-outlined" style="font-size: 20px;">photo_camera</span>
-                            </div>
-                        </label>
-                        <input type="file" id="student-avatar-input" accept="image/*" style="display:none">
-                        <button type="button" class="avatar-remove-btn" id="avatar-remove-btn" title="Remove Photo">
-                            <span class="material-symbols-outlined" style="font-size: 14px;">close</span>
-                        </button>
                         ${isActive ? `<div class="student-status-dot" title="Active Intern" aria-label="Active intern"></div>` : ''}
                     </div>
                     <div class="student-info">
@@ -506,10 +497,16 @@
                     </div>
                     <div class="skill-modal-body">
                         <p class="skill-modal-intro">How proficient are you in <strong>${skillName}</strong>?</p>
-                        <div class="skill-range-wrap">
-                            <div class="skill-range-val" id="skill-range-display">80%</div>
-                            <input type="range" id="skill-level-range" min="0" max="100" value="80" class="skill-slider">
-                            <div class="skill-range-labels">
+                        <div class="slider-wrapper">
+                            <div class="skill-range-val" id="skill-range-display" style="font-size: 2.5rem; font-weight: 800; text-align: center; margin-bottom: 20px;">80%</div>
+                            <div class="slider-container" style="position: relative; width: 100%; height: 40px; display: flex; align-items: center;">
+                                <div class="slider-track" style="position: absolute; height: 3px; width: 100%; background: #e4e4e7; border-radius: 10px;">
+                                    <div class="slider-range" id="sliderRange" style="position: absolute; height: 3px; background: #2563eb; border-radius: 10px; width: 80%;"></div>
+                                </div>
+                                <input type="range" id="skill-level-range" min="0" max="100" step="1" value="80" class="skill-slider custom-range-slider" />
+                                <div id="valueBubble" class="value-bubble">80</div>
+                            </div>
+                            <div class="skill-range-labels" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #888; text-transform: uppercase; margin-top: 10px;">
                                 <span>Beginner</span>
                                 <span>Expert</span>
                             </div>
@@ -525,11 +522,36 @@
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            const range = modal.querySelector('#skill-level-range');
+            const newModal = modal.cloneNode(true);
+            modal.parentNode.replaceChild(newModal, modal);
+            modal = newModal;
+
+            const rangeInput = modal.querySelector('#skill-level-range');
             const display = modal.querySelector('#skill-range-display');
-            range.addEventListener('input', (e) => {
-                display.textContent = e.target.value + '%';
-            });
+            const sliderRange = modal.querySelector('#sliderRange');
+            const bubble = modal.querySelector('#valueBubble');
+
+            const updateSlider = () => {
+                const value = rangeInput.value;
+                const min = rangeInput.min ? rangeInput.min : 0;
+                const max = rangeInput.max ? rangeInput.max : 100;
+                const percent = ((value - min) / (max - min)) * 100;
+
+                if (bubble) {
+                    bubble.innerText = value;
+                    bubble.style.left = percent + "%";
+                    bubble.style.transform = "translate(-50%, -5px)";
+                    setTimeout(() => {
+                        bubble.style.transform = "translate(-50%, 0px)";
+                    }, 150);
+                }
+
+                if (sliderRange) sliderRange.style.width = percent + "%";
+                if (display) display.textContent = value + '%';
+            };
+
+            rangeInput.addEventListener('input', updateSlider);
+            updateSlider();
 
             const close = () => {
                 modal.classList.remove('active');
@@ -538,12 +560,6 @@
                 setTimeout(() => { if (!modal.classList.contains('active')) modal.innerHTML = ''; }, 300);
             };
 
-            // Remove previous listeners if any (by replacing the element or using a flag, 
-            // but since we replace innerHTML, we just need to be careful with the overlay itself)
-            const newModal = modal.cloneNode(true);
-            modal.parentNode.replaceChild(newModal, modal);
-            modal = newModal;
-
             modal.querySelectorAll('.skill-modal-close').forEach(c => c.addEventListener('click', close));
 
             modal.addEventListener('click', (e) => {
@@ -551,7 +567,7 @@
             });
 
             modal.querySelector('#confirm-skill-level').addEventListener('click', () => {
-                const level = range.value;
+                const level = rangeInput.value;
                 close(); // Close first to improve feel
                 setTimeout(() => onSave(level), 50); // Small delay to let modal start closing
             });
@@ -625,45 +641,7 @@
             });
         }
 
-        // Avatar Upload
-        const avatarInput = document.getElementById('student-avatar-input');
-        if (avatarInput) {
-            avatarInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                if (file.size > 2 * 1024 * 1024) {
-                    showToast('Image too large. Max 2MB.', 'error');
-                    return;
-                }
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    p.avatar = ev.target.result;
-                    Storage.saveProfile(session.userId, p);
-                    refreshView(p, session);
-                    showToast('Profile photo updated!', 'success');
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        // Avatar Remove
-        const removeAvatarBtn = document.getElementById('avatar-remove-btn');
-        if (removeAvatarBtn) {
-            removeAvatarBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (!p.avatar) {
-                    showToast('No photo to remove.', 'info');
-                    return;
-                }
-                if (confirm('Remove profile photo?')) {
-                    p.avatar = '';
-                    Storage.saveProfile(session.userId, p);
-                    refreshView(p, session);
-                    showToast('Profile photo removed.', 'success');
-                }
-            });
-        }
+        // Avatar logic removed
 
         // Name Save
         const nameSaveBtn = document.getElementById('name-save-btn');

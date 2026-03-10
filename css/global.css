@@ -28,33 +28,9 @@ body {
     color: var(--clr-text-primary);
     background-color: var(--clr-bg-deep);
     overflow-x: hidden;
-    opacity: 0;
-    transition: opacity var(--dur-fast) var(--ease-out);
 }
 
-body.page-loaded {
-    opacity: 1;
-}
 
-body.page-exiting {
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* ── Page Transition Overlay ── */
-.page-transition-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--clr-bg-deep);
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 1;
-    transition: opacity var(--dur-fast) var(--ease-out);
-}
-
-.page-loaded .page-transition-overlay {
-    opacity: 0;
-}
 
 
 a {
@@ -76,6 +52,14 @@ select {
     border: none;
     outline: none;
     background: none;
+    color: inherit;
+}
+
+option {
+    background-color: var(--clr-bg-deep);
+    /* Use the standard dark background */
+    color: var(--clr-text-primary);
+    /* Ensure text is visible in options */
 }
 
 ul,
