@@ -563,7 +563,7 @@
         renderLineChart('line-chart-wrap-2', 'progress', myP, false); // False = granular
     }
 
-    window.submitHourlyReport = function () {
+    window.submitHourlyReport = async function () {
         const now = new Date();
         const hr = now.getHours();
 
@@ -581,7 +581,7 @@
         }
 
         if (targetHr === -1) {
-            alert(`Reporting is currently unavailable. Windows are every 2 hours (09:00 - 18:00). Final submission expires at 19:00 (7 PM).`);
+            await IrisModal.alert(`Reporting is currently unavailable. Windows are every 2 hours (09:00 - 18:00). Final submission expires at 19:00 (7 PM).`);
             return;
         }
 
@@ -590,22 +590,41 @@
         const dup = reports.find(r => new Date(r.createdAt).toDateString() === todayStr && r.window === targetHr);
 
         if (dup) {
-            alert(`You have already submitted your report for the ${targetHr === 18 ? '6:00 PM' : targetHr + ':00'} slot.`);
+            await IrisModal.alert(`You have already submitted your report for the ${targetHr === 18 ? '6:00 PM' : targetHr + ':00'} slot.`);
             return;
         }
 
         const slotLabel = targetHr === 18 ? "6:00 PM (Final)" : `${targetHr}:00`;
-        const note = prompt(`Enter your progress update for the ${slotLabel} window:`);
+        const note = await IrisModal.prompt(`Enter your progress update for the ${slotLabel} window:`);
         if (!note) return;
 
-        Storage.saveHourlyReport({
+        const report = Storage.saveHourlyReport({
             userId: session.userId,
             window: targetHr,
             note: note,
             timestamp: now.getTime()
         });
 
-        alert('Report submitted successfully! Your progress graph will update.');
+        // Sync report to Firestore
+        if (Storage.saveActivityReportToFirebase) {
+            Storage.saveActivityReportToFirebase(session.userId, report).catch(e => console.warn('Report sync failed:', e));
+        }
+
+        // Sync analytics summary to Firestore
+        if (Storage.syncAnalytics) {
+            const currentProfile = Storage.getProfile(session.userId);
+            const myP = Storage.getProjects().filter(p => String(p.ownerId) === String(session.userId));
+            const analyticsPayload = {
+                userId: session.userId,
+                overallScore: typeof computeScore === 'function' ? computeScore(currentProfile, myP) : 0,
+                projectCount: myP.length,
+                skillCount: (currentProfile?.skills || []).length,
+                reportsCount: Storage.getHourlyReports(session.userId).length
+            };
+            Storage.syncAnalytics(session.userId, analyticsPayload).catch(e => console.warn('Analytics sync failed:', e));
+        }
+
+        await IrisModal.alert('Report submitted successfully! Your progress graph will update.');
         refreshChart2();
     };
 

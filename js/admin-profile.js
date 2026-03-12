@@ -92,6 +92,11 @@
 
     function saveAdminData() {
         Storage.saveAdminProfile(session.userId, currentAdminData);
+        // Sync to Firestore admins/{adminId}
+        if (Storage.syncAdminProfile) {
+            Storage.syncAdminProfile(session.userId, currentAdminData)
+                .catch(err => console.warn('[AdminProfile] Firestore sync failed:', err));
+        }
         // Also sync to session for sidebar name etc.
         const updatedSession = { ...session, displayName: currentAdminData.name, email: currentAdminData.email };
         sessionStorage.setItem('iris_session', JSON.stringify(updatedSession));

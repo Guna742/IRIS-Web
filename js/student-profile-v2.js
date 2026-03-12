@@ -467,10 +467,10 @@
 
         // Remove skill
         document.querySelectorAll('.skill-remove-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 e.stopPropagation();
                 const skillName = btn.dataset.skill;
-                if (confirm(`Remove skill "${skillName}"?`)) {
+                if (await IrisModal.confirm(`Remove skill "${skillName}"?`, 'Confirm Removal', true)) {
                     p.skills = (p.skills || []).filter(s => (typeof s === 'object' ? s.name : s) !== skillName);
                     Storage.saveProfile(session.userId, p);
                     refreshView(p, session);

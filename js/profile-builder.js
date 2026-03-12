@@ -19,12 +19,28 @@
     const saveStatusText = document.getElementById('save-status-text');
     const saveStatusIcon = document.getElementById('save-status-icon');
 
-    const tagsList = document.getElementById('tags-list');
-    const tagsInput = document.getElementById('skills-input');
-    const skillsCountBadge = document.getElementById('skills-count-badge');
     const logoutBtn = document.getElementById('logout-btn');
     const studentSelector = document.getElementById('student-selector');
     const addStudentBtn = document.getElementById('add-student-btn');
+
+    // ── Logout ──
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => Auth.logout());
+    }
+
+    // ── Info button dropdown ──
+    const infoBtn = document.getElementById('info-btn');
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => {
+            IrisModal.alert('Profile Builder — Create and manage intern portfolio profiles. Fill in the fields and click Save Profile.', 'Help');
+        });
+    }
+
+    // ── Credential Modal Refs ──
+    const credModal = document.getElementById('credential-modal');
+    const modalPass = document.getElementById('modal-password');
+    const modalCancel = document.getElementById('modal-cancel-btn');
+    const modalConfirm = document.getElementById('modal-confirm-btn');
 
     // ── Multi-profile State ──
     let allProfiles = Storage.getProfiles();
@@ -46,8 +62,8 @@
             `<option value="${p.userId}" ${p.userId === currentStudentId ? 'selected' : ''}>${p.name || p.userId}</option>`
         ).join('');
 
-        studentSelector.addEventListener('change', (e) => {
-            if (!confirm('Switch student? Unsaved changes for the current student will be lost.')) {
+        studentSelector.addEventListener('change', async (e) => {
+            if (!(await IrisModal.confirm('Switch student? Unsaved changes for the current student will be lost.'))) {
                 studentSelector.value = currentStudentId;
                 return;
             }
@@ -60,19 +76,23 @@
     }
 
     if (addStudentBtn) {
-        addStudentBtn.addEventListener('click', () => {
-            const name = prompt('Enter new student name:');
+        addStudentBtn.addEventListener('click', async () => {
+            const name = await IrisModal.prompt('Enter new student name:');
             if (!name) return;
-            const id = 'u_new_' + Date.now();
+            const email = await IrisModal.prompt('Enter intern email address:');
+            if (!email) return;
+
+            const id = 'u_' + Date.now();
             const newProfile = {
                 userId: id,
                 name: name,
-                email: '',
+                email: email.trim().toLowerCase(),
                 tagline: '',
                 bio: '',
                 skills: [],
                 internship: {},
-                socialLinks: {}
+                socialLinks: {},
+                _isNew: true // Flag to trigger credential capture on Save
             };
             allProfiles[id] = newProfile;
             Storage.saveProfile(id, newProfile);
@@ -84,7 +104,7 @@
             profile = allProfiles[currentStudentId];
             skills = [];
             populateForm(profile);
-            showToast(`Created profile for ${name}`, 'success');
+            showToast(`Created draft for ${name}`, 'success');
         });
     }
 
@@ -98,9 +118,6 @@
         getField('bio').value = p.bio || '';
         getField('github').value = p.socialLinks?.github || '';
         getField('linkedin').value = p.socialLinks?.linkedin || '';
-        // Avatar logic removed
-        // Skills
-        renderTags();
         // Internship
         const i = p.internship || {};
         getField('company').value = i.company || '';
@@ -113,51 +130,6 @@
 
 
 
-    // ── Tag chip system ──
-    function renderTags() {
-        tagsList.innerHTML = skills.map((s, i) => `
-      <span class="tag-chip">
-        ${s}
-        <button class="tag-chip-remove" data-idx="${i}" aria-label="Remove ${s} skill" type="button">
-          <span class="material-symbols-outlined" style="font-size: 12px;">close</span>
-        </button>
-      </span>
-    `).join('');
-        // Attach remove listeners
-        tagsList.querySelectorAll('.tag-chip-remove').forEach(btn => {
-            btn.addEventListener('click', () => {
-                skills.splice(parseInt(btn.dataset.idx, 10), 1);
-                renderTags();
-                markUnsaved();
-            });
-        });
-        skillsCountBadge.textContent = skills.length ? `(${skills.length})` : '';
-    }
-
-    function addTag(value) {
-        const v = value.trim().replace(/,$/, '');
-        if (!v || skills.includes(v)) return;
-        skills.push(v);
-        renderTags();
-        markUnsaved();
-    }
-
-    tagsInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addTag(tagsInput.value);
-            tagsInput.value = '';
-        } else if (e.key === 'Backspace' && !tagsInput.value && skills.length) {
-            skills.pop();
-            renderTags();
-            markUnsaved();
-        }
-    });
-    tagsInput.addEventListener('blur', () => {
-        if (tagsInput.value.trim()) { addTag(tagsInput.value); tagsInput.value = ''; }
-    });
-    // Allow clicking tag wrap to focus input
-    document.getElementById('tags-wrap').addEventListener('click', () => tagsInput.focus());
 
     // ── Change detection ──
     function markSaved() {
@@ -178,7 +150,7 @@
     });
 
     // ── Save ──
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
         const p = {
             ...profile,
             name: getField('name').value.trim(),
@@ -200,12 +172,45 @@
             }
         };
 
+        // If it's a new intern, we need account creation
+        if (p._isNew) {
+            const password = await showCredentialModal();
+            if (!password) {
+                showToast('Creation cancelled. Profile not saved to cloud.', 'info');
+                return;
+            }
+
+            saveStatusText.textContent = 'Creating cloud account...';
+            const result = await Storage.createInternAccount(p, password);
+            if (!result.success) {
+                showToast('Firebase Error: ' + result.error, 'error');
+                saveStatusText.textContent = 'Account failed';
+                return;
+            }
+
+            // Re-fetch since createInternAccount changes UID
+            currentStudentId = result.userId;
+            allProfiles = Storage.getProfiles();
+            profile = allProfiles[currentStudentId];
+            showToast(`Account created for ${p.name}!`, 'success');
+        } else {
+            // Update existing in Firestore
+            try {
+                saveStatusText.textContent = 'Syncing to cloud...';
+                await Storage.saveProfileToFirebase(currentStudentId, p);
+            } catch (err) {
+                console.warn('[ProfileBuilder] Cloud sync failed:', err);
+                showToast(`Cloud Sync Failed: ${err.message}`, 'error');
+            }
+        }
+
+        // Always save locally
         Storage.saveProfile(currentStudentId, p);
         allProfiles = Storage.getProfiles();
         profile = allProfiles[currentStudentId];
-        initStudentSelector(); // Update dropdown text in case name changed
+        initStudentSelector();
 
-        // Success feedback
+        // UI feedback
         saveBtn.classList.add('saved-anim');
         setTimeout(() => saveBtn.classList.remove('saved-anim'), 800);
         saveStatus.classList.add('saved');
@@ -213,12 +218,40 @@
         saveStatusIcon.classList.add('material-symbols-outlined');
         saveStatusText.textContent = 'Saved successfully';
 
-        showToast(`Profile for ${p.name || currentStudentId} saved!`, 'success');
+        showToast(`Profile for ${p.name || currentStudentId} updated!`, 'success');
         setTimeout(() => {
             saveStatus.classList.remove('saved');
             saveStatusText.textContent = 'All changes saved';
         }, 3000);
     });
+
+    /** Show the password modal and return a promise */
+    function showCredentialModal() {
+        return new Promise((resolve) => {
+            credModal.style.display = 'flex';
+            setTimeout(() => credModal.classList.add('show'), 10);
+            modalPass.value = '';
+            modalPass.focus();
+
+            const close = (val) => {
+                credModal.classList.remove('show');
+                setTimeout(() => {
+                    credModal.style.display = 'none';
+                    resolve(val);
+                }, 300);
+            };
+
+            modalCancel.onclick = () => close(null);
+            modalConfirm.onclick = () => {
+                const pass = modalPass.value.trim();
+                if (!pass || pass.length < 6) {
+                    alert('Password must be at least 6 characters.');
+                    return;
+                }
+                close(pass);
+            };
+        });
+    }
 
     // ── Accordion ──
     document.querySelectorAll('.accordion-header').forEach(header => {

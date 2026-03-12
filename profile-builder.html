@@ -13,6 +13,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/auth.js"></script>
+    <link rel="stylesheet" href="css/iris-modal.css">
+    <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/glowing-effect.css">
+    <link rel="icon" type="image/png" href="img/iris-logo.png">
 </head>
 
 <body>
@@ -72,7 +76,7 @@
                         <span class="material-symbols-outlined">info</span>
                     </button>
                     <span class="badge badge-admin">Admin</span>
-                    <button class="btn btn-secondary btn-sm" id="logout-btn" aria-label="Sign out">
+                    <button class="btn btn-secondary btn-sm btn-magnetic" id="logout-btn" aria-label="Sign out">
                         <span class="material-symbols-outlined" style="font-size: 16px;">logout</span>
                         Sign Out
                     </button>
@@ -182,42 +186,6 @@
                             </div>
                         </div>
 
-                        <!-- Skills -->
-                        <div class="accordion-item" id="acc-skills">
-                            <div class="accordion-header" role="button" tabindex="0" aria-expanded="false"
-                                aria-controls="body-skills">
-                                <div class="accordion-header-left">
-                                    <div class="accordion-icon material-symbols-outlined"
-                                        style="background:rgba(34,211,238,.1); display: flex; align-items: center; justify-content: center;"
-                                        aria-hidden="true">bolt
-                                    </div>
-                                    <span class="accordion-title">Skills</span>
-                                    <span class="accordion-badge" id="skills-count-badge" aria-live="polite"></span>
-                                </div>
-                                <svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                    stroke-width="2" aria-hidden="true">
-                                    <path d="M6 9l6 6 6-6" />
-                                </svg>
-                            </div>
-                            <div class="accordion-body" id="body-skills">
-                                <div class="accordion-inner">
-                                    <div class="accordion-content">
-                                        <div class="field-group">
-                                            <label class="field-label" for="skills-input">Technical Skills</label>
-                                            <div class="tags-input-wrap" id="tags-wrap" role="group"
-                                                aria-label="Skills tags">
-                                                <div id="tags-list"></div>
-                                                <input class="tags-input" type="text" id="skills-input"
-                                                    placeholder="Type skill + Enter" aria-label="Add skill">
-                                            </div>
-                                            <span class="tags-hint">Press <kbd>Enter</kbd> or <kbd>,</kbd> to add a
-                                                skill.
-                                                Click × to remove.</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                         <!-- Internship Details -->
                         <div class="accordion-item" id="acc-internship">
@@ -276,12 +244,37 @@
 
     <div class="toast-container" id="toast-container" aria-live="polite"></div>
 
+    <!-- Credential Modal (Hidden by default) -->
+    <div id="credential-modal" class="iris-modal-overlay" style="display: none;">
+        <div class="iris-modal-box" style="max-width: 420px;">
+            <div class="iris-modal-header">
+                <div class="iris-modal-icon prompt"><span class="material-symbols-outlined">key</span></div>
+                <h3 class="iris-modal-title">Set Intern Password</h3>
+            </div>
+            <div class="iris-modal-body">
+                <p style="margin-bottom: 12px;">Create a login password for the new intern account.</p>
+                <div class="field-group">
+                    <label class="field-label" for="modal-password">Login Password</label>
+                    <input type="password" id="modal-password" class="field-input" placeholder="Min 6 characters">
+                </div>
+            </div>
+            <div class="iris-modal-actions">
+                <button class="iris-modal-btn iris-modal-btn-cancel" id="modal-cancel-btn">Cancel</button>
+                <button class="iris-modal-btn iris-modal-btn-confirm" id="modal-confirm-btn">Confirm & Create
+                    Account</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/page-transition.js"></script>
 
     <script src="js/storage.js"></script>
     <script src="js/admin-popup.js"></script>
     <script src="js/profile-builder.js"></script>
     <script src="js/theme-switcher.js"></script>
+    <script src="js/animation-engine.js"></script>
+    <script src="js/glowing-effect.js"></script>
+    <script src="js/iris-modal.js"></script>
 </body>
 
 </html>

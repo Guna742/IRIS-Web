@@ -160,15 +160,19 @@
         const p = Storage.getProjectById(id);
         if (!p) return;
         p.rating = rating;
-        Storage.saveProject(p);
+        const updated = Storage.saveProject(p);
+        // Sync rating to Firestore
+        if (Storage.syncProject) Storage.syncProject(updated || p);
         showToast(`Project rated ${rating}/5`, 'success');
         renderProjects();
     }
 
     // ── Delete ──
-    function handleDelete(id, title) {
-        if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
+    async function handleDelete(id, title) {
+        if (!(await IrisModal.confirm(`Delete "${title}"? This cannot be undone.`, 'Confirm Deletion', true))) return;
         Storage.deleteProject(id);
+        // Sync deletion to Firestore
+        if (Storage.deleteProjectFromFirebase) Storage.deleteProjectFromFirebase(id);
         showToast(`"${title}" deleted.`, 'info');
         renderProjects();
     }
@@ -346,7 +350,9 @@
             createdAt: editingId ? Storage.getProjectById(editingId).createdAt : Date.now()
         };
 
-        Storage.saveProject(project);
+        const saved = Storage.saveProject(project);
+        // Sync project to Firestore
+        if (Storage.syncProject) Storage.syncProject(saved || project);
         closeModal();
         renderProjects();
         showToast(editingId ? 'Project updated!' : 'Project added!', 'success');

@@ -39,13 +39,40 @@ const Auth = (() => {
       let storedRole = role;
       let displayName = firebaseUser.displayName || '';
       try {
+        let data = null;
         const doc = await fbDb.collection('users').doc(firebaseUser.uid).get();
         if (doc.exists) {
-          const data = doc.data();
-          storedRole = data.role || role;
-          displayName = data.displayName || displayName;
+          data = doc.data();
         }
-      } catch (_) { /* ignore Firestore errors, fall back to selected role */ }
+
+        // Fetch role - prefer Firestore data
+        if (data) {
+          storedRole = data.role || role;
+          displayName = data.displayName || data.name || displayName;
+        }
+
+        // If admin, also try admins/ collection for richer profile
+        if (storedRole === 'admin' || role === 'admin') {
+          try {
+            const adminDoc = await fbDb.collection('admins').doc(firebaseUser.uid).get();
+            if (adminDoc.exists) {
+              const adminData = adminDoc.data();
+              displayName = adminData.name || displayName;
+              if (typeof Storage !== 'undefined' && Storage.saveAdminProfile) {
+                Storage.saveAdminProfile(firebaseUser.uid, adminData);
+              }
+            }
+          } catch (_) { /* admin doc may not exist yet */ }
+        }
+
+        // Sync cloud profile to local storage for interns
+        if (data && storedRole === 'user' && typeof Storage !== 'undefined' && Storage.saveProfile) {
+          Storage.saveProfile(firebaseUser.uid, data);
+        }
+
+      } catch (err) {
+        console.warn('[Auth] Firestore profile fetch failed:', err);
+      }
 
       // Verify role matches what the user selected
       if (storedRole !== role) {

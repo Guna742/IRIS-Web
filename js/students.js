@@ -488,18 +488,18 @@
     }, 150);
   };
 
-  window.suspendStudent = function (uid) {
+  window.suspendStudent = async function (uid) {
     const profile = Storage.getProfile(uid);
     if (!profile) return;
 
     const confirmMsg = `Are you sure you want to suspend ${profile.name || 'this intern'}?`;
-    if (!confirm(confirmMsg)) return;
+    if (!(await IrisModal.confirm(confirmMsg))) return;
 
-    const daysStr = prompt(`How many days should ${profile.name || 'this intern'} be suspended?`, "7");
+    const daysStr = await IrisModal.prompt(`How many days should ${profile.name || 'this intern'} be suspended?`, "7");
     const days = parseInt(daysStr);
 
     if (isNaN(days) || days <= 0) {
-      alert("Please enter a valid number of days.");
+      await IrisModal.alert("Please enter a valid number of days.");
       return;
     }
 
@@ -508,15 +508,15 @@
     Storage.saveProfile(uid, profile);
 
     renderAllCards();
-    alert(`${profile.name || 'Intern'} has been suspended for ${days} days.`);
+    await IrisModal.alert(`${profile.name || 'Intern'} has been suspended for ${days} days.`);
   };
 
-  window.deleteStudent = function (uid) {
+  window.deleteStudent = async function (uid) {
     const profile = Storage.getProfile(uid);
     if (!profile) return;
 
     const confirmMsg = `CRITICAL: Are you sure you want to DELETE ${profile.name || 'this intern'}? This action cannot be undone and will remove all their projects.`;
-    if (!confirm(confirmMsg)) return;
+    if (!(await IrisModal.confirm(confirmMsg, 'Confirm Deletion', true))) return;
 
     if (Storage.deleteProfile(uid)) {
       renderAllCards();
@@ -524,7 +524,7 @@
       const profiles = Storage.getProfiles();
       const count = Object.keys(profiles).length;
       studentsCountEl.textContent = `${count} intern${count !== 1 ? 's' : ''}`;
-      alert("Intern profile deleted successfully.");
+      await IrisModal.alert("Intern profile deleted successfully.");
     }
   };
 

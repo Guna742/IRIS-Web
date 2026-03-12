@@ -119,11 +119,20 @@
   const myProjects = projects.filter(p => p.ownerId === session.userId).length;
   const teamSize = allProfiles.filter(p => p.internship?.company === (userProfile?.internship?.company || 'N/A')).length;
 
+  // Calculate Days Left based on 156-day duration
+  const totalInternshipDays = 156;
+  let daysLeft = totalInternshipDays;
+  if (userProfile && userProfile.createdAt) {
+    const elapsedMs = Date.now() - userProfile.createdAt;
+    const elapsedDays = Math.floor(elapsedMs / (1000 * 60 * 60 * 24));
+    daysLeft = Math.max(0, totalInternshipDays - elapsedDays);
+  }
+
   const STATS_USER = [
     { label: 'My Projects', value: myProjects, icon: 'folder', color: '#8b5cf6', trend: 'Active', clickable: true, href: 'projects.html' },
     { label: 'Skills', value: profile.skills.length, icon: 'bolt', color: '#22d3ee', trend: 'Listed' },
     { label: 'My Team', value: teamSize, icon: 'group_work', color: '#a855f7', trend: 'Collaborators' },
-    { label: 'Days Left', value: 42, icon: 'calendar_month', color: '#10b981', trend: 'On track' },
+    { label: 'Days Left', value: daysLeft, icon: 'calendar_month', color: '#10b981', trend: 'On track' },
   ];
 
   const stats = isAdmin ? STATS_ADMIN : STATS_USER;

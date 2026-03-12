@@ -19,3 +19,6 @@ if (!firebase.apps.length) {
 
 const fbAuth = firebase.auth();
 const fbDb = firebase.firestore();
+
+// Enable debug logging for deeper troubleshooting
+// firebase.firestore.setLogLevel('debug');

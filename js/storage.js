@@ -39,6 +39,26 @@ const Storage = (() => {
         if (!localStorage.getItem(REPORTS_KEY)) {
             localStorage.setItem(REPORTS_KEY, JSON.stringify([]));
         }
+
+        // Firestore Health Check (Silent test)
+        testFirestore().then(ok => {
+            if (ok) console.log('[Storage] Firestore connection verified.');
+            else console.warn('[Storage] Firestore connection test failed.');
+        });
+    }
+
+    /**
+     * Internal test to see if Firestore is unreachable or misconfigured.
+     */
+    async function testFirestore() {
+        try {
+            const testDoc = fbDb.collection('_health_check').doc('status');
+            await testDoc.set({ lastCheck: Date.now() }, { merge: true });
+            return true;
+        } catch (err) {
+            console.error('[Storage] Firestore connection fault:', err);
+            return false;
+        }
     }
 
     // ── Profiles ──
@@ -192,6 +212,198 @@ const Storage = (() => {
         return index > -1 ? index + 1 : null;
     }
 
+    // ── Firebase Integration (Full Architecture) ──
+
+    /**
+     * Helper to strip undefined/null values for Firestore compatibility.
+     */
+    function _sanitizeData(data) {
+        const clean = {};
+        Object.keys(data).forEach(key => {
+            if (data[key] !== undefined && data[key] !== null) {
+                if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+                    clean[key] = _sanitizeData(data[key]);
+                } else {
+                    clean[key] = data[key];
+                }
+            }
+        });
+        return clean;
+    }
+
+    // ── ADMIN: Sync admin profile to admins/{adminId} ──
+    async function syncAdminProfile(adminId, data) {
+        if (!adminId || !data) return;
+        try {
+            const clean = _sanitizeData({ ...data, adminId, updatedAt: Date.now() });
+            delete clean.password;
+            await fbDb.collection('admins').doc(adminId).set(clean, { merge: true });
+            console.log('[Storage] Admin profile synced to Firestore.');
+        } catch (err) {
+            console.error('[Storage] Admin profile sync error:', err);
+        }
+    }
+
+    // ── ADMIN: Create intern credential record in admins/{adminId}/interns/{internId} ──
+    async function createInternRecord(adminId, internId, internEmail, internName) {
+        if (!adminId || !internId) return;
+        try {
+            await fbDb.collection('admins').doc(adminId)
+                .collection('interns').doc(internId).set({
+                    email: internEmail,
+                    name: internName,
+                    internId,
+                    createdAt: Date.now()
+                });
+            console.log('[Storage] Intern record created under admin.');
+        } catch (err) {
+            console.error('[Storage] createInternRecord error:', err);
+        }
+    }
+
+    // ── INTERN: Sync intern profile to users/{internId} ──
+    async function syncInternProfile(internId, data) {
+        if (!internId || !data) return;
+        try {
+            const clean = _sanitizeData({ ...data });
+            delete clean.password;
+            delete clean._isNew;
+            delete clean._isSkeleton;
+            await fbDb.collection('users').doc(internId).set({
+                ...clean,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log(`[Storage] Intern profile synced: ${internId}`);
+        } catch (err) {
+            console.error('[Storage] syncInternProfile error:', err);
+            throw err;
+        }
+    }
+
+    // ── INTERN: Sync analytics to users/{internId}/analytics (single doc) ──
+    async function syncAnalytics(internId, analyticsData) {
+        if (!internId || !analyticsData) return;
+        try {
+            await fbDb.collection('users').doc(internId)
+                .collection('analytics').doc('summary').set({
+                    ...analyticsData,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            console.log(`[Storage] Analytics synced for ${internId}`);
+        } catch (err) {
+            console.error('[Storage] syncAnalytics error:', err);
+        }
+    }
+
+    // ── PROJECT: Sync project to top-level projects/{projectId} ──
+    async function syncProject(project) {
+        if (!project || !project.id) return;
+        try {
+            const clean = _sanitizeData({ ...project });
+            await fbDb.collection('projects').doc(project.id).set({
+                ...clean,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log(`[Storage] Project synced: ${project.id}`);
+        } catch (err) {
+            console.error('[Storage] syncProject error:', err);
+        }
+    }
+
+    // ── PROJECT: Delete project from Firestore ──
+    async function deleteProjectFromFirebase(projectId) {
+        if (!projectId) return;
+        try {
+            await fbDb.collection('projects').doc(projectId).delete();
+            console.log(`[Storage] Project deleted from Firestore: ${projectId}`);
+        } catch (err) {
+            console.error('[Storage] deleteProject error:', err);
+        }
+    }
+
+    // ── REPORT: Save daily activity report to users/{internId}/reports/{reportId} ──
+    async function saveActivityReportToFirebase(internId, report) {
+        if (!internId || !report) return;
+        try {
+            const reportId = report.id || ('rep_fb_' + Date.now());
+            await fbDb.collection('users').doc(internId)
+                .collection('reports').doc(reportId).set({
+                    ...report,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            console.log(`[Storage] Report saved to Firestore: ${reportId}`);
+        } catch (err) {
+            console.error('[Storage] saveActivityReportToFirebase error:', err);
+        }
+    }
+
+    // ── Legacy: kept for compatibility ──
+    async function saveProfileToFirebase(userId, data) {
+        return syncInternProfile(userId, data);
+    }
+
+    /**
+     * Create Firebase Auth account and initial Firestore profile.
+     * Uses secondary Firebase app instance to avoid logging out the admin.
+     */
+    async function createInternAccount(profile, password) {
+        const { email, name } = profile;
+        if (!email || !password) return { success: false, error: 'Email and password are required.' };
+
+        const tempAppName = 'temp_app_' + Date.now();
+        let tempApp;
+        try {
+            // 1. Create secondary app to create user without changing admin state
+            tempApp = firebase.initializeApp(firebaseConfig, tempAppName);
+            const tempAuth = tempApp.auth();
+
+            // 2. Create the Firebase Auth user
+            const cred = await tempAuth.createUserWithEmailAndPassword(email.toLowerCase().trim(), password);
+            const userId = cred.user.uid;
+
+            // 3. Prepare final profile
+            const finalProfile = {
+                ...profile,
+                userId,
+                role: 'user',
+                displayName: name,
+                createdAt: Date.now()
+            };
+            delete finalProfile._isNew;
+
+            // 4. Write to users/{userId} using temp app (intern context)
+            const tempDb = tempApp.firestore();
+            const cleanedForDb = _sanitizeData(finalProfile);
+            delete cleanedForDb.password;
+            await tempDb.collection('users').doc(userId).set(cleanedForDb);
+            console.log('[Storage] Intern user doc created in Firestore.');
+
+            // 5. Write credential record to admins/{adminId}/interns/{internId}
+            const adminSession = Auth.getSession();
+            if (adminSession && adminSession.role === 'admin') {
+                await createInternRecord(adminSession.userId, userId, email, name);
+            }
+
+            // 6. Update localStorage with the real Firebase UID
+            const profiles = getProfiles();
+            delete profiles[profile.userId];
+            profiles[userId] = finalProfile;
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+
+            return { success: true, userId };
+
+        } catch (err) {
+            console.error('[Storage] Account creation error:', {
+                message: err.message,
+                code: err.code,
+                email: profile.email
+            });
+            return { success: false, error: err.message };
+        } finally {
+            if (tempApp) await tempApp.delete();
+        }
+    }
+
     return {
         seed,
         getProfiles,
@@ -207,7 +419,18 @@ const Storage = (() => {
         computeInternScore,
         getInternRank,
         getHourlyReports,
-        saveHourlyReport
+        saveHourlyReport,
+        // Firestore Sync
+        syncAdminProfile,
+        createInternRecord,
+        syncInternProfile,
+        syncAnalytics,
+        syncProject,
+        deleteProjectFromFirebase,
+        saveActivityReportToFirebase,
+        saveProfileToFirebase,   // legacy alias
+        createInternAccount,
+        testFirestore
     };
 })();
 
