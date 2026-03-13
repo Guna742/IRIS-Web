@@ -14,27 +14,14 @@ const PageTransition = (() => {
         '.no-transition'               // Explicitly opted-out links
     ];
 
-    const TRANSITION_DURATION = 150; // ms (Snappier feel)
+    const TRANSITION_DURATION = 800; // ms (Slower for improved visibility)
 
     // ── Initialization ──
     const init = () => {
-        // 1. Create and inject overlay if it doesn't exist
-        if (!document.getElementById('page-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.id = 'page-overlay';
-            overlay.className = 'page-transition-overlay';
-            document.body.appendChild(overlay);
-        }
+        // Removed overlay injection
 
-        // 2. Handle Entry Transition
         window.addEventListener('load', () => {
             document.body.classList.add('page-loaded');
-
-            // Remove overlay after transition for accessibility/interaction
-            setTimeout(() => {
-                const overlay = document.getElementById('page-overlay');
-                if (overlay) overlay.style.pointerEvents = 'none';
-            }, TRANSITION_DURATION);
         });
 
         // 3. Handle Exit Transitions (Link Clicks)
@@ -58,18 +45,7 @@ const PageTransition = (() => {
     };
 
     const navigateTo = (targetHref) => {
-        document.body.classList.remove('page-loaded');
-        document.body.classList.add('page-exiting');
-
-        // Preload hint
-        const linkElem = document.createElement('link');
-        linkElem.rel = 'prefetch';
-        linkElem.href = targetHref;
-        document.head.appendChild(linkElem);
-
-        setTimeout(() => {
-            window.location.href = targetHref;
-        }, 80);
+        window.location.href = targetHref;
     };
 
     const handleLinkClick = (e) => {

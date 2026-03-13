@@ -18,14 +18,29 @@
     const saveStatus = document.getElementById('save-status');
     const saveStatusText = document.getElementById('save-status-text');
     const saveStatusIcon = document.getElementById('save-status-icon');
-    const avatarPreview = document.getElementById('avatar-preview');
-    const avatarFile = document.getElementById('avatar-file');
-    const tagsList = document.getElementById('tags-list');
-    const tagsInput = document.getElementById('skills-input');
-    const skillsCountBadge = document.getElementById('skills-count-badge');
+
     const logoutBtn = document.getElementById('logout-btn');
     const studentSelector = document.getElementById('student-selector');
     const addStudentBtn = document.getElementById('add-student-btn');
+
+    // ── Logout ──
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => Auth.logout());
+    }
+
+    // ── Info button dropdown ──
+    const infoBtn = document.getElementById('info-btn');
+    if (infoBtn) {
+        infoBtn.addEventListener('click', () => {
+            IrisModal.alert('Profile Builder — Create and manage intern portfolio profiles. Fill in the fields and click Save Profile.', 'Help');
+        });
+    }
+
+    // ── Credential Modal Refs ──
+    const credModal = document.getElementById('credential-modal');
+    const modalPass = document.getElementById('modal-password');
+    const modalCancel = document.getElementById('modal-cancel-btn');
+    const modalConfirm = document.getElementById('modal-confirm-btn');
 
     // ── Multi-profile State ──
     let allProfiles = Storage.getProfiles();
@@ -47,8 +62,8 @@
             `<option value="${p.userId}" ${p.userId === currentStudentId ? 'selected' : ''}>${p.name || p.userId}</option>`
         ).join('');
 
-        studentSelector.addEventListener('change', (e) => {
-            if (!confirm('Switch student? Unsaved changes for the current student will be lost.')) {
+        studentSelector.addEventListener('change', async (e) => {
+            if (!(await IrisModal.confirm('Switch student? Unsaved changes for the current student will be lost.'))) {
                 studentSelector.value = currentStudentId;
                 return;
             }
@@ -61,19 +76,23 @@
     }
 
     if (addStudentBtn) {
-        addStudentBtn.addEventListener('click', () => {
-            const name = prompt('Enter new student name:');
+        addStudentBtn.addEventListener('click', async () => {
+            const name = await IrisModal.prompt('Enter new student name:');
             if (!name) return;
-            const id = 'u_new_' + Date.now();
+            const email = await IrisModal.prompt('Enter intern email address:');
+            if (!email) return;
+
+            const id = 'u_' + Date.now();
             const newProfile = {
                 userId: id,
                 name: name,
-                email: '',
+                email: email.trim().toLowerCase(),
                 tagline: '',
                 bio: '',
                 skills: [],
                 internship: {},
-                socialLinks: {}
+                socialLinks: {},
+                _isNew: true // Flag to trigger credential capture on Save
             };
             allProfiles[id] = newProfile;
             Storage.saveProfile(id, newProfile);
@@ -85,7 +104,7 @@
             profile = allProfiles[currentStudentId];
             skills = [];
             populateForm(profile);
-            showToast(`Created profile for ${name}`, 'success');
+            showToast(`Created draft for ${name}`, 'success');
         });
     }
 
@@ -99,101 +118,31 @@
         getField('bio').value = p.bio || '';
         getField('github').value = p.socialLinks?.github || '';
         getField('linkedin').value = p.socialLinks?.linkedin || '';
-        // Avatar
-        if (p.avatar) {
-            setAvatarPreview(p.avatar);
-        } else {
-            avatarPreview.textContent = (p.name || 'J')[0].toUpperCase();
-        }
-        // Skills
-        renderTags();
         // Internship
         const i = p.internship || {};
         getField('company').value = i.company || '';
         getField('role').value = i.role || '';
         getField('start').value = i.startDate || '';
-        getField('end').value = i.endDate || '';
         getField('intern-desc').value = i.description || '';
     }
 
     function getField(id) { return document.getElementById('field-' + id); }
 
-    // ── Avatar upload ──
-    avatarFile.addEventListener('change', e => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 2 * 1024 * 1024) {
-            showToast('Image too large. Max size is 2MB.', 'error');
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = ev => {
-            profile.avatar = ev.target.result;
-            setAvatarPreview(ev.target.result);
-            markUnsaved();
-        };
-        reader.readAsDataURL(file);
-    });
-    function setAvatarPreview(src) {
-        avatarPreview.innerHTML = `<img src="${src}" alt="Avatar preview">`;
-    }
 
-    // ── Tag chip system ──
-    function renderTags() {
-        tagsList.innerHTML = skills.map((s, i) => `
-      <span class="tag-chip">
-        ${s}
-        <button class="tag-chip-remove" data-idx="${i}" aria-label="Remove ${s} skill" type="button">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </span>
-    `).join('');
-        // Attach remove listeners
-        tagsList.querySelectorAll('.tag-chip-remove').forEach(btn => {
-            btn.addEventListener('click', () => {
-                skills.splice(parseInt(btn.dataset.idx, 10), 1);
-                renderTags();
-                markUnsaved();
-            });
-        });
-        skillsCountBadge.textContent = skills.length ? `(${skills.length})` : '';
-    }
 
-    function addTag(value) {
-        const v = value.trim().replace(/,$/, '');
-        if (!v || skills.includes(v)) return;
-        skills.push(v);
-        renderTags();
-        markUnsaved();
-    }
-
-    tagsInput.addEventListener('keydown', e => {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addTag(tagsInput.value);
-            tagsInput.value = '';
-        } else if (e.key === 'Backspace' && !tagsInput.value && skills.length) {
-            skills.pop();
-            renderTags();
-            markUnsaved();
-        }
-    });
-    tagsInput.addEventListener('blur', () => {
-        if (tagsInput.value.trim()) { addTag(tagsInput.value); tagsInput.value = ''; }
-    });
-    // Allow clicking tag wrap to focus input
-    document.getElementById('tags-wrap').addEventListener('click', () => tagsInput.focus());
 
     // ── Change detection ──
     function markSaved() {
         saveStatus.classList.remove('saved');
-        saveStatusIcon.textContent = '✅';
+        saveStatusIcon.textContent = 'check_circle';
+        saveStatusIcon.classList.add('material-symbols-outlined');
         saveStatusText.textContent = 'All changes saved';
     }
 
     function markUnsaved() {
         saveStatus.classList.remove('saved');
-        saveStatusIcon.textContent = '💾';
+        saveStatusIcon.textContent = 'save';
+        saveStatusIcon.classList.add('material-symbols-outlined');
         saveStatusText.textContent = 'Unsaved changes';
     }
     document.querySelectorAll('.field-input').forEach(el => {
@@ -201,7 +150,7 @@
     });
 
     // ── Save ──
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
         const p = {
             ...profile,
             name: getField('name').value.trim(),
@@ -218,30 +167,91 @@
                 company: getField('company').value.trim(),
                 role: getField('role').value.trim(),
                 startDate: getField('start').value,
-                endDate: getField('end').value,
                 description: getField('intern-desc').value.trim(),
                 technologies: skills.slice(0, 4),
             }
         };
 
+        // If it's a new intern, we need account creation
+        if (p._isNew) {
+            const password = await showCredentialModal();
+            if (!password) {
+                showToast('Creation cancelled. Profile not saved to cloud.', 'info');
+                return;
+            }
+
+            saveStatusText.textContent = 'Creating cloud account...';
+            const result = await Storage.createInternAccount(p, password);
+            if (!result.success) {
+                showToast('Firebase Error: ' + result.error, 'error');
+                saveStatusText.textContent = 'Account failed';
+                return;
+            }
+
+            // Re-fetch since createInternAccount changes UID
+            currentStudentId = result.userId;
+            allProfiles = Storage.getProfiles();
+            profile = allProfiles[currentStudentId];
+            showToast(`Account created for ${p.name}!`, 'success');
+        } else {
+            // Update existing in Firestore
+            try {
+                saveStatusText.textContent = 'Syncing to cloud...';
+                await Storage.saveProfileToFirebase(currentStudentId, p);
+            } catch (err) {
+                console.warn('[ProfileBuilder] Cloud sync failed:', err);
+                showToast(`Cloud Sync Failed: ${err.message}`, 'error');
+            }
+        }
+
+        // Always save locally
         Storage.saveProfile(currentStudentId, p);
         allProfiles = Storage.getProfiles();
         profile = allProfiles[currentStudentId];
-        initStudentSelector(); // Update dropdown text in case name changed
+        initStudentSelector();
 
-        // Success feedback
+        // UI feedback
         saveBtn.classList.add('saved-anim');
         setTimeout(() => saveBtn.classList.remove('saved-anim'), 800);
         saveStatus.classList.add('saved');
-        saveStatusIcon.textContent = '✅';
+        saveStatusIcon.textContent = 'check_circle';
+        saveStatusIcon.classList.add('material-symbols-outlined');
         saveStatusText.textContent = 'Saved successfully';
 
-        showToast(`Profile for ${p.name || currentStudentId} saved!`, 'success');
+        showToast(`Profile for ${p.name || currentStudentId} updated!`, 'success');
         setTimeout(() => {
             saveStatus.classList.remove('saved');
             saveStatusText.textContent = 'All changes saved';
         }, 3000);
     });
+
+    /** Show the password modal and return a promise */
+    function showCredentialModal() {
+        return new Promise((resolve) => {
+            credModal.style.display = 'flex';
+            setTimeout(() => credModal.classList.add('show'), 10);
+            modalPass.value = '';
+            modalPass.focus();
+
+            const close = (val) => {
+                credModal.classList.remove('show');
+                setTimeout(() => {
+                    credModal.style.display = 'none';
+                    resolve(val);
+                }, 300);
+            };
+
+            modalCancel.onclick = () => close(null);
+            modalConfirm.onclick = () => {
+                const pass = modalPass.value.trim();
+                if (!pass || pass.length < 6) {
+                    alert('Password must be at least 6 characters.');
+                    return;
+                }
+                close(pass);
+            };
+        });
+    }
 
     // ── Accordion ──
     document.querySelectorAll('.accordion-header').forEach(header => {
@@ -266,10 +276,10 @@
     // ── Toast ──
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
-        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        const icons = { success: 'check_circle', error: 'error', info: 'info' };
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        toast.innerHTML = `<span class="toast-icon" aria-hidden="true">${icons[type]}</span><span>${message}</span>`;
+        toast.innerHTML = `<span class="toast-icon material-symbols-outlined" aria-hidden="true">${icons[type]}</span><span>${message}</span>`;
         container.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -301,17 +311,17 @@
 
 
         const items = [
-            { label: 'Dashboard', href: 'dashboard.html', icon: '⊞' },
-            { label: 'My Profile', href: 'admin-profile.html', icon: '👤' },
-            { label: 'Interns', href: 'students.html', icon: '👥' },
-            { label: 'Projects', href: 'projects.html', icon: '🗂️' },
+            { label: 'Dashboard', href: 'dashboard.html', icon: 'grid_view' },
+            { label: 'My Profile', href: 'admin-profile.html', icon: 'person' },
+            { label: 'Interns', href: 'students.html', icon: 'group' },
+            { label: 'Projects', href: 'projects.html', icon: 'folder' },
         ];
 
         if (nav) {
             nav.innerHTML = '<div class="nav-section-label">Menu</div>' +
                 items.map(item => `
           <a class="nav-item${item.href === activePage ? ' active' : ''}" href="${item.href}" aria-current="${item.href === activePage ? 'page' : 'false'}">
-            <span class="nav-icon" aria-hidden="true">${item.icon}</span>
+            <span class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">${item.icon}</span></span>
             <span>${item.label}</span>
           </a>`).join('');
         }

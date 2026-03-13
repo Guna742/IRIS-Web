@@ -8,112 +8,15 @@
 const Storage = (() => {
     const PROFILES_KEY = 'interntrack_profiles';
     const PROJECTS_KEY = 'interntrack_projects';
+    const REPORTS_KEY = 'interntrack_hourly_reports';
 
     // ── Default seed data (loaded on first run) ──
-    const DEFAULT_PROFILES = {
-        'u_intern1': {
-            userId: 'u_intern1',
-            name: 'Jordan Lee',
-            email: 'jordan01@interntrack.com',
-            tagline: 'Full-Stack Intern | Building tomorrow\'s products today',
-            bio: 'Passionate software engineering intern with a knack for clean UI and scalable systems. Currently exploring the intersection of design and engineering through hands-on internship experience.',
-            avatar: '',
-            location: 'San Francisco, CA',
-            skills: ['JavaScript', 'HTML/CSS', 'Node.js', 'React', 'Git', 'Figma', 'REST APIs', 'SQL'],
-            internship: {
-                company: 'TechVentures Inc.',
-                role: 'Frontend Engineering Intern',
-                startDate: '2025-06-01',
-                endDate: '2025-12-01',
-                description: 'Developed and maintained client-facing web applications, collaborated with senior engineers on the design system.',
-                technologies: ['React', 'TypeScript', 'Figma', 'REST APIs'],
-            },
-            socialLinks: {
-                github: 'https://github.com',
-                linkedin: 'https://linkedin.com',
-            }
-        },
-        'u_intern2': {
-            userId: 'u_intern2',
-            name: 'Casey Rivera',
-            email: 'intern02@interntrack.com',
-            tagline: 'UI/UX Design Intern | Crafting human-centric digital experiences',
-            bio: 'Aspiring product designer focusing on accessible and intuitive interfaces. Bridging the gap between user needs and technical feasibility.',
-            avatar: '',
-            location: 'Austin, TX',
-            skills: ['Figma', 'Adobe XD', 'UI Design', 'User Research', 'Prototyping', 'HTML', 'CSS'],
-            internship: {
-                company: 'CreativePulse Studios',
-                role: 'UI/UX Design Intern',
-                startDate: '2025-07-15',
-                endDate: '2026-01-15',
-                description: 'Assisted in redesigning the core mobile experience, conducted user testing sessions, and created a comprehensive UI kit.',
-                technologies: ['Figma', 'Prototyping'],
-            },
-            socialLinks: {
-                github: '',
-                linkedin: 'https://linkedin.com',
-            }
-        }
-    };
+    const DEFAULT_PROFILES = {};
 
-    const DEFAULT_PROJECTS = [
-        {
-            id: 'proj_1',
-            title: 'InternTrack Platform',
-            description: 'A role-based SaaS internship management portal built with pure HTML, CSS, and Vanilla JavaScript. Features glassmorphism UI, LocalStorage persistence, and full role-based access control.',
-            techStack: ['HTML5', 'CSS3', 'JavaScript', 'LocalStorage'],
-            githubLink: 'https://github.com',
-            liveLink: 'https://interntrack.demo',
-            screenshot: '',
-            ownerId: 'u_intern1',
-            ownerName: 'Jordan Lee',
-            status: 'Completed',
-            createdAt: Date.now() - 86400000 * 5,
-        },
-        {
-            id: 'proj_2',
-            title: 'Dev Portfolio Generator',
-            description: 'A no-code portfolio builder that generates responsive HTML/CSS portfolios from a simple JSON config. Auto-deploys to GitHub Pages with one click.',
-            techStack: ['Node.js', 'JSON', 'GitHub Actions', 'CSS'],
-            githubLink: 'https://github.com',
-            liveLink: '',
-            screenshot: '',
-            ownerId: 'u_intern1',
-            ownerName: 'Jordan Lee',
-            status: 'Ongoing',
-            createdAt: Date.now() - 86400000 * 2,
-        },
-        {
-            id: 'proj_3',
-            title: 'Real-Time Chat App',
-            description: 'WebSocket-based real-time messaging application with room support, username auth, typing indicators, and message history.',
-            techStack: ['WebSockets', 'Node.js', 'HTML', 'CSS'],
-            githubLink: 'https://github.com',
-            liveLink: '',
-            screenshot: '',
-            ownerId: 'u_intern2',
-            ownerName: 'Casey Rivera',
-            status: 'Pending',
-            createdAt: Date.now() - 86400000 * 1,
-        },
-        {
-            id: 'proj_4',
-            title: 'AI Task Automator',
-            description: 'A browser extension that uses LLMs to automate repetitive web tasks based on natural language commands.',
-            techStack: ['JavaScript', 'Chrome Extension', 'OpenAI'],
-            githubLink: 'https://github.com',
-            liveLink: '',
-            screenshot: '',
-            ownerId: 'u_intern1',
-            ownerName: 'Jordan Lee',
-            status: 'Ongoing',
-            createdAt: Date.now() - 86400000 * 0.5,
-        },
-    ];
+    const DEFAULT_PROJECTS = [];
 
     const VERSION_KEY = 'interntrack_v';
-    const CURRENT_VERSION = '2.1';
+    const CURRENT_VERSION = '3.0';
 
     /** Bootstrap default data on first run; clears stale data from old builds. */
     function seed() {
@@ -121,6 +24,7 @@ const Storage = (() => {
         if (storedVersion !== CURRENT_VERSION) {
             localStorage.removeItem(PROFILES_KEY);
             localStorage.removeItem(PROJECTS_KEY);
+            localStorage.removeItem(REPORTS_KEY);
             Object.keys(localStorage)
                 .filter(k => k.startsWith('interntrack_') && k !== VERSION_KEY)
                 .forEach(k => localStorage.removeItem(k));
@@ -131,6 +35,29 @@ const Storage = (() => {
         }
         if (!localStorage.getItem(PROJECTS_KEY)) {
             localStorage.setItem(PROJECTS_KEY, JSON.stringify(DEFAULT_PROJECTS));
+        }
+        if (!localStorage.getItem(REPORTS_KEY)) {
+            localStorage.setItem(REPORTS_KEY, JSON.stringify([]));
+        }
+
+        // Firestore Health Check (Silent test)
+        testFirestore().then(ok => {
+            if (ok) console.log('[Storage] Firestore connection verified.');
+            else console.warn('[Storage] Firestore connection test failed.');
+        });
+    }
+
+    /**
+     * Internal test to see if Firestore is unreachable or misconfigured.
+     */
+    async function testFirestore() {
+        try {
+            const testDoc = fbDb.collection('_health_check').doc('status');
+            await testDoc.set({ lastCheck: Date.now() }, { merge: true });
+            return true;
+        } catch (err) {
+            console.error('[Storage] Firestore connection fault:', err);
+            return false;
         }
     }
 
@@ -149,7 +76,25 @@ const Storage = (() => {
         }
         if (!userId) return null;
         const profiles = getProfiles();
-        return profiles[userId] || null;
+        if (profiles[userId]) return profiles[userId];
+
+        // NEW: Handle missing profiles for logged-in users (Skeletal Profile)
+        const session = Auth.getSession();
+        if (session && session.userId === userId) {
+            return {
+                userId,
+                name: session.displayName || 'New Intern',
+                email: session.email || '',
+                tagline: 'Software Engineering Intern',
+                bio: 'Welcome to I.R.I.S! Please update your bio and skills to complete your profile.',
+                skills: [],
+                location: '',
+                internship: { role: 'Intern', company: '' },
+                socialLinks: { github: '', linkedin: '' },
+                _isSkeleton: true // Internal flag to prompt saving
+            };
+        }
+        return null;
     }
 
     function saveProfile(userId, data) {
@@ -203,6 +148,25 @@ const Storage = (() => {
         return getProjects().find(p => p.id === id) || null;
     }
 
+    // ── Hourly Reports ──
+    function getHourlyReports(userId) {
+        try {
+            const raw = localStorage.getItem(REPORTS_KEY);
+            const all = raw ? JSON.parse(raw) : [];
+            if (!userId) return all;
+            return all.filter(r => String(r.userId) === String(userId));
+        } catch { return []; }
+    }
+
+    function saveHourlyReport(report) {
+        const all = getHourlyReports();
+        report.id = 'rep_' + Date.now();
+        report.createdAt = Date.now();
+        all.push(report);
+        localStorage.setItem(REPORTS_KEY, JSON.stringify(all));
+        return report;
+    }
+
     // ── Admin Profiles ──
     const ADMIN_KEY = 'interntrack_admin';
     function getAdminProfile(userId) {
@@ -224,14 +188,14 @@ const Storage = (() => {
 
     /** Centralized scoring logic (shared across leaderboard/profile/analytics) */
     function computeInternScore(p) {
-        let score = 50;
-        if (p.skills?.length) score += Math.min(p.skills.length * 3, 20);
-        if (p.bio?.length > 40) score += 10;
-        if (p.internship?.company) score += 10;
-        if (p.avatar) score += 5;
-        if (p.socialLinks?.github) score += 2;
-        if (p.socialLinks?.linkedin) score += 3;
-        return Math.min(score, 100);
+        if (!p || !p.userId) return 0;
+        const projects = getProjects().filter(proj => String(proj.ownerId) === String(p.userId));
+        const ratedProjects = projects.filter(proj => proj.rating);
+        if (ratedProjects.length === 0) return 0;
+
+        const totalRating = ratedProjects.reduce((sum, proj) => sum + proj.rating, 0);
+        const avg = totalRating / ratedProjects.length;
+        return Math.round((avg / 5) * 100);
     }
 
     /** Calculate rank for a specific intern based on overall score */
@@ -248,6 +212,198 @@ const Storage = (() => {
         return index > -1 ? index + 1 : null;
     }
 
+    // ── Firebase Integration (Full Architecture) ──
+
+    /**
+     * Helper to strip undefined/null values for Firestore compatibility.
+     */
+    function _sanitizeData(data) {
+        const clean = {};
+        Object.keys(data).forEach(key => {
+            if (data[key] !== undefined && data[key] !== null) {
+                if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+                    clean[key] = _sanitizeData(data[key]);
+                } else {
+                    clean[key] = data[key];
+                }
+            }
+        });
+        return clean;
+    }
+
+    // ── ADMIN: Sync admin profile to admins/{adminId} ──
+    async function syncAdminProfile(adminId, data) {
+        if (!adminId || !data) return;
+        try {
+            const clean = _sanitizeData({ ...data, adminId, updatedAt: Date.now() });
+            delete clean.password;
+            await fbDb.collection('admins').doc(adminId).set(clean, { merge: true });
+            console.log('[Storage] Admin profile synced to Firestore.');
+        } catch (err) {
+            console.error('[Storage] Admin profile sync error:', err);
+        }
+    }
+
+    // ── ADMIN: Create intern credential record in admins/{adminId}/interns/{internId} ──
+    async function createInternRecord(adminId, internId, internEmail, internName) {
+        if (!adminId || !internId) return;
+        try {
+            await fbDb.collection('admins').doc(adminId)
+                .collection('interns').doc(internId).set({
+                    email: internEmail,
+                    name: internName,
+                    internId,
+                    createdAt: Date.now()
+                });
+            console.log('[Storage] Intern record created under admin.');
+        } catch (err) {
+            console.error('[Storage] createInternRecord error:', err);
+        }
+    }
+
+    // ── INTERN: Sync intern profile to users/{internId} ──
+    async function syncInternProfile(internId, data) {
+        if (!internId || !data) return;
+        try {
+            const clean = _sanitizeData({ ...data });
+            delete clean.password;
+            delete clean._isNew;
+            delete clean._isSkeleton;
+            await fbDb.collection('users').doc(internId).set({
+                ...clean,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log(`[Storage] Intern profile synced: ${internId}`);
+        } catch (err) {
+            console.error('[Storage] syncInternProfile error:', err);
+            throw err;
+        }
+    }
+
+    // ── INTERN: Sync analytics to users/{internId}/analytics (single doc) ──
+    async function syncAnalytics(internId, analyticsData) {
+        if (!internId || !analyticsData) return;
+        try {
+            await fbDb.collection('users').doc(internId)
+                .collection('analytics').doc('summary').set({
+                    ...analyticsData,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                }, { merge: true });
+            console.log(`[Storage] Analytics synced for ${internId}`);
+        } catch (err) {
+            console.error('[Storage] syncAnalytics error:', err);
+        }
+    }
+
+    // ── PROJECT: Sync project to top-level projects/{projectId} ──
+    async function syncProject(project) {
+        if (!project || !project.id) return;
+        try {
+            const clean = _sanitizeData({ ...project });
+            await fbDb.collection('projects').doc(project.id).set({
+                ...clean,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            console.log(`[Storage] Project synced: ${project.id}`);
+        } catch (err) {
+            console.error('[Storage] syncProject error:', err);
+        }
+    }
+
+    // ── PROJECT: Delete project from Firestore ──
+    async function deleteProjectFromFirebase(projectId) {
+        if (!projectId) return;
+        try {
+            await fbDb.collection('projects').doc(projectId).delete();
+            console.log(`[Storage] Project deleted from Firestore: ${projectId}`);
+        } catch (err) {
+            console.error('[Storage] deleteProject error:', err);
+        }
+    }
+
+    // ── REPORT: Save daily activity report to users/{internId}/reports/{reportId} ──
+    async function saveActivityReportToFirebase(internId, report) {
+        if (!internId || !report) return;
+        try {
+            const reportId = report.id || ('rep_fb_' + Date.now());
+            await fbDb.collection('users').doc(internId)
+                .collection('reports').doc(reportId).set({
+                    ...report,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            console.log(`[Storage] Report saved to Firestore: ${reportId}`);
+        } catch (err) {
+            console.error('[Storage] saveActivityReportToFirebase error:', err);
+        }
+    }
+
+    // ── Legacy: kept for compatibility ──
+    async function saveProfileToFirebase(userId, data) {
+        return syncInternProfile(userId, data);
+    }
+
+    /**
+     * Create Firebase Auth account and initial Firestore profile.
+     * Uses secondary Firebase app instance to avoid logging out the admin.
+     */
+    async function createInternAccount(profile, password) {
+        const { email, name } = profile;
+        if (!email || !password) return { success: false, error: 'Email and password are required.' };
+
+        const tempAppName = 'temp_app_' + Date.now();
+        let tempApp;
+        try {
+            // 1. Create secondary app to create user without changing admin state
+            tempApp = firebase.initializeApp(firebaseConfig, tempAppName);
+            const tempAuth = tempApp.auth();
+
+            // 2. Create the Firebase Auth user
+            const cred = await tempAuth.createUserWithEmailAndPassword(email.toLowerCase().trim(), password);
+            const userId = cred.user.uid;
+
+            // 3. Prepare final profile
+            const finalProfile = {
+                ...profile,
+                userId,
+                role: 'user',
+                displayName: name,
+                createdAt: Date.now()
+            };
+            delete finalProfile._isNew;
+
+            // 4. Write to users/{userId} using temp app (intern context)
+            const tempDb = tempApp.firestore();
+            const cleanedForDb = _sanitizeData(finalProfile);
+            delete cleanedForDb.password;
+            await tempDb.collection('users').doc(userId).set(cleanedForDb);
+            console.log('[Storage] Intern user doc created in Firestore.');
+
+            // 5. Write credential record to admins/{adminId}/interns/{internId}
+            const adminSession = Auth.getSession();
+            if (adminSession && adminSession.role === 'admin') {
+                await createInternRecord(adminSession.userId, userId, email, name);
+            }
+
+            // 6. Update localStorage with the real Firebase UID
+            const profiles = getProfiles();
+            delete profiles[profile.userId];
+            profiles[userId] = finalProfile;
+            localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+
+            return { success: true, userId };
+
+        } catch (err) {
+            console.error('[Storage] Account creation error:', {
+                message: err.message,
+                code: err.code,
+                email: profile.email
+            });
+            return { success: false, error: err.message };
+        } finally {
+            if (tempApp) await tempApp.delete();
+        }
+    }
+
     return {
         seed,
         getProfiles,
@@ -261,7 +417,20 @@ const Storage = (() => {
         getAdminProfile,
         saveAdminProfile,
         computeInternScore,
-        getInternRank
+        getInternRank,
+        getHourlyReports,
+        saveHourlyReport,
+        // Firestore Sync
+        syncAdminProfile,
+        createInternRecord,
+        syncInternProfile,
+        syncAnalytics,
+        syncProject,
+        deleteProjectFromFirebase,
+        saveActivityReportToFirebase,
+        saveProfileToFirebase,   // legacy alias
+        createInternAccount,
+        testFirestore
     };
 })();
 

@@ -1,6 +1,6 @@
 /**
  * InternTrack — Admin Profile Logic
- * Displays admin's own profile with live stats, intern roster, recent projects.
+ * Displays admin's own profile with live stats, intern directory, recent projects.
  */
 
 'use strict';
@@ -64,11 +64,7 @@
         if (currentAdminData.avatar) {
             avatarEl.innerHTML = `<img src="${currentAdminData.avatar}" alt="${currentAdminData.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
         } else {
-            avatarEl.innerHTML = `
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5" aria-hidden="true" style="margin-bottom:0">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
-                </svg>`;
+            avatarEl.innerHTML = `<span>${currentAdminData.name[0].toUpperCase()}</span>`;
         }
     }
 
@@ -96,10 +92,15 @@
 
     function saveAdminData() {
         Storage.saveAdminProfile(session.userId, currentAdminData);
+        // Sync to Firestore admins/{adminId}
+        if (Storage.syncAdminProfile) {
+            Storage.syncAdminProfile(session.userId, currentAdminData)
+                .catch(err => console.warn('[AdminProfile] Firestore sync failed:', err));
+        }
         // Also sync to session for sidebar name etc.
         const updatedSession = { ...session, displayName: currentAdminData.name, email: currentAdminData.email };
-        sessionStorage.setItem('interntrack_session', JSON.stringify(updatedSession));
-        localStorage.setItem('interntrack_session', JSON.stringify(updatedSession));
+        sessionStorage.setItem('iris_session', JSON.stringify(updatedSession));
+        localStorage.setItem('iris_session', JSON.stringify(updatedSession));
         updateProfileUI();
     }
 
@@ -136,44 +137,7 @@
         roleField.addEventListener('keydown', (e) => { if (e.key === 'Enter') roleSaveBtn.click(); });
     }
 
-    // ── Avatar Upload Logic ──
-    const uploadTrigger = document.getElementById('avatar-upload-trigger');
-    const avatarInput = document.getElementById('admin-avatar-input');
-
-    const removeAvatarBtn = document.getElementById('avatar-remove-btn');
-
-    if (avatarInput) {
-        avatarInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-            if (file.size > 2 * 1024 * 1024) {
-                showToast('Image too large. Max 2MB.', 'error');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                currentAdminData.avatar = ev.target.result;
-                saveAdminData();
-                showToast('Profile photo updated!', 'success');
-            };
-            reader.readAsDataURL(file);
-        });
-    }
-
-    if (removeAvatarBtn) {
-        removeAvatarBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!currentAdminData.avatar) {
-                showToast('No photo to remove.', 'info');
-                return;
-            }
-            if (confirm('Remove profile photo?')) {
-                currentAdminData.avatar = '';
-                saveAdminData();
-                showToast('Profile photo removed.', 'success');
-            }
-        });
-    }
+    // ── Avatar Upload Logic removed ──
 
     // ── Compute & render stats ──
     const profiles = Storage.getProfiles();
@@ -182,15 +146,15 @@
 
     const totalStudents = allProfiles.length;
     const totalSkills = allProfiles.reduce((acc, p) => acc + (p.skills?.length || 0), 0);
-    const companies = new Set(allProfiles.map(p => p.internship?.company).filter(Boolean));
-    const totalCompanies = companies.size;
+    const teams = new Set(allProfiles.map(p => p.internship?.company).filter(Boolean));
+    const totalTeams = teams.size;
 
     // Animate counters
     animateCounter('stat-students', totalStudents, 0);
     animateCounter('stat-skills', totalSkills, 100);
-    animateCounter('stat-companies', totalCompanies, 200);
+    animateCounter('stat-companies', totalTeams, 200);
 
-    // ── Intern Roster ──
+    // ── Intern Directory ──
     const rosterEl = document.getElementById('student-roster');
     if (rosterEl) {
         if (allProfiles.length === 0) {
@@ -211,8 +175,8 @@
                         <div class="student-list-role">${role} · ${company}</div>
                     </div>
                     <div style="display:flex;gap:6px;flex-shrink:0">
-                        <a href="student-analytics.html?student=${p.userId}" class="btn btn-secondary btn-sm" title="View analytics" aria-label="View analytics for ${p.name}" style="padding:4px 10px">📊</a>
-                        <a href="profile-builder.html?student=${p.userId}" class="btn btn-primary btn-sm" title="Edit profile" aria-label="Edit profile for ${p.name}" style="padding:4px 10px">✏️</a>
+                        <a href="student-analytics.html?student=${p.userId}" class="btn btn-secondary btn-sm" title="View analytics" aria-label="View analytics for ${p.name}" style="padding:4px 10px"><span class="material-symbols-outlined" style="font-size: 16px;">analytics</span></a>
+                        <a href="profile-builder.html?student=${p.userId}" class="btn btn-primary btn-sm" title="Edit profile" aria-label="Edit profile for ${p.name}" style="padding:4px 10px"><span class="material-symbols-outlined" style="font-size: 16px;">edit</span></a>
                     </div>
                 </div>`;
             }).join('');
@@ -289,10 +253,10 @@
 
     function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
-        const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+        const icons = { success: 'check_circle', error: 'error', info: 'info' };
         const toast = document.createElement('div');
         toast.className = `toast toast-${type}`;
-        toast.innerHTML = `<span class="toast-icon" aria-hidden="true">${icons[type]}</span><span>${message}</span>`;
+        toast.innerHTML = `<span class="toast-icon material-symbols-outlined" aria-hidden="true">${icons[type]}</span><span>${message}</span>`;
         container.appendChild(toast);
         setTimeout(() => {
             toast.style.opacity = '0';
@@ -324,17 +288,17 @@
         if (roleEl) roleEl.textContent = 'Administrator';
 
         const items = [
-            { label: 'Dashboard', href: 'dashboard.html', icon: '⊞' },
-            { label: 'My Profile', href: 'admin-profile.html', icon: '👤', active: activePage === 'admin-profile.html' },
-            { label: 'Interns', href: 'students.html', icon: '👥' },
-            { label: 'Projects', href: 'projects.html', icon: '🗂️' },
+            { label: 'Dashboard', href: 'dashboard.html', icon: 'grid_view' },
+            { label: 'My Profile', href: 'admin-profile.html', icon: 'person', active: activePage === 'admin-profile.html' },
+            { label: 'Interns', href: 'students.html', icon: 'group' },
+            { label: 'Projects', href: 'projects.html', icon: 'folder' },
         ];
 
         if (nav) {
             nav.innerHTML = '<div class="nav-section-label">Menu</div>' +
                 items.map(item => `
                 <a class="nav-item${item.href === activePage ? ' active' : ''}" href="${item.href}" aria-current="${item.href === activePage ? 'page' : 'false'}">
-                    <span class="nav-icon" aria-hidden="true">${item.icon}</span>
+                    <span class="nav-icon" aria-hidden="true"><span class="material-symbols-outlined">${item.icon}</span></span>
                     <span>${item.label}</span>
                 </a>`).join('');
         }

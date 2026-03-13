@@ -12,21 +12,21 @@
       id: 'default',
       label: 'Dark Mode',
       description: 'Original deep dark theme',
-      icon: '🌙',
+      icon: 'dark_mode',
       palette: ['#060912', '#4f7cff', '#7c5cfc'],
     },
     {
       id: 'google',
       label: 'Google',
       description: 'Clean Google-inspired light theme',
-      icon: '🎨',
+      icon: 'palette',
       palette: ['#ffffff', '#4285F4', '#34A853'],
     },
     {
       id: 'instagram',
       label: 'Instagram',
       description: 'Instagram gradient theme',
-      icon: '📸',
+      icon: 'photo_camera',
       palette: ['#833ab4', '#fd1d1d', '#fcb045'],
     },
   ];
@@ -73,7 +73,8 @@
         --clr-border-active: #4285F4;
         background-color: var(--clr-bg-deep) !important;
       }
-      /* Kill the background glow orbs in analytics */
+      /* Kill the background glow orbs and aurora for light themes */
+      body.theme-google .bg-wrap,
       body.theme-google::before,
       body.theme-google::after { display: none !important; }
       body.theme-google .app-sidebar {
@@ -101,8 +102,20 @@
         box-shadow: 0 2px 6px rgba(0,0,0,.25);
         filter: none;
       }
-      body.theme-google .sidebar-logo { background: #4285F4; }
+      body.theme-google .sidebar-logo { background: #000 !important; border-radius: var(--radius-lg) !important; }
       body.theme-google .user-avatar  { background: #4285F4; }
+      /* ── Sidebar brand: visible on white Google background ── */
+      body.theme-google .sidebar-title {
+        background: linear-gradient(135deg, #1a73e8 0%, #4285F4 60%, #34A853 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        filter: drop-shadow(0 0 3px rgba(66,133,244,0.25)) !important;
+      }
+      body.theme-google .sidebar-slogan {
+        color: #5f6368 !important;
+        opacity: 1 !important;
+      }
       body.theme-google .field-input {
         background: #ffffff;
         border-color: #dadce0;
@@ -238,7 +251,7 @@
       body.theme-google .student-avatar,
       body.theme-google .admin-avatar,
       body.theme-google .owner-avatar-sm { background: #4285F4 !important; }
-      body.theme-google .sidebar-logo    { background: #4285F4 !important; }
+      body.theme-google .sidebar-logo    { background: #000 !important; border-radius: var(--radius-lg) !important; }
       body.theme-google .badge-admin,
       body.theme-google .apop-badge-admin { background: rgba(66,133,244,.12); color: #4285F4; border-color: rgba(66,133,244,.3); }
 
@@ -480,7 +493,8 @@
         border-bottom: 1px solid rgba(255,255,255,.08);
       }
       body.theme-instagram .sidebar-logo {
-        background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+        background: #000 !important;
+        border-radius: var(--radius-lg) !important;
       }
       body.theme-instagram .btn-primary {
         background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
@@ -784,6 +798,13 @@
         color: #fafafa !important;
       }
       
+      body.theme-emerald .search-wrap .form-input {
+        background: #f0fdf4 !important;
+        border-color: rgba(62, 138, 79, 0.2) !important;
+        color: #1a2e1d !important;
+      }
+      body.theme-emerald .search-wrap .material-symbols-outlined { color: #3E8A4F !important; }
+      
       /* Avoid header or overlay overlap blockage */
       .app-content {
         z-index: 5 !important;
@@ -811,6 +832,8 @@
         background-image: none !important;
         pointer-events: none !important;
       }
+
+
     `;
     document.head.appendChild(style);
   }
@@ -822,13 +845,7 @@
     fab.id = 'theme-switcher-fab';
     fab.setAttribute('aria-label', 'Change color theme');
     fab.setAttribute('title', 'Change Theme');
-    fab.innerHTML = `
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 2a10 10 0 0 1 0 20"/>
-        <path d="M2 12h20"/>
-        <path d="M12 2c2.5 3 4 6.5 4 10s-1.5 7-4 10"/>
-      </svg>`;
+    fab.innerHTML = `<span class="material-symbols-outlined">settings_brightness</span>`;
 
     // Panel
     const panel = document.createElement('div');
@@ -837,8 +854,8 @@
     panel.setAttribute('aria-label', 'Theme selection');
     panel.innerHTML = `
       <div id="theme-panel-header">
-        <span id="theme-panel-title">✨ Choose Theme</span>
-        <button id="theme-panel-close" aria-label="Close theme panel">✕</button>
+        <span id="theme-panel-title"><span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; margin-right: 4px;">palette</span> Choose Theme</span>
+        <button id="theme-panel-close" aria-label="Close theme panel"><span class="material-symbols-outlined" style="font-size: 18px;">close</span></button>
       </div>
       <div id="theme-options" role="listbox" aria-label="Available themes">
         ${THEMES.map(t => `
@@ -849,11 +866,11 @@
             aria-label="${t.label} theme"
             title="${t.label}"
           >
-            <span class="theme-option-icon">${t.icon}</span>
+            <span class="theme-option-icon material-symbols-outlined">${t.icon}</span>
             <div class="theme-palette">
               ${t.palette.map(c => `<span class="theme-palette-dot" style="background:${c}"></span>`).join('')}
             </div>
-            <span class="theme-option-check" aria-hidden="true">✓</span>
+            <span class="theme-option-check material-symbols-outlined" aria-hidden="true">check</span>
           </button>`).join('')}
       </div>`;
 
@@ -866,7 +883,7 @@
   function applyTheme(themeId, save = true) {
     const body = document.body;
     // Remove old theme classes
-    body.classList.remove('theme-default', 'theme-google', 'theme-instagram');
+    body.classList.remove('theme-default', 'theme-google', 'theme-instagram', 'theme-emerald');
     if (themeId !== 'default') {
       body.classList.add(`theme-${themeId}`);
     }
